@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finvest — P2P Crypto Trading</title>
+    <meta name="description" content="Finvest P2P Trading Platform — Buy and sell cryptocurrency directly with other users securely.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar (loaded from components/sidebar.html) -->
+        <div id="sidebarContainer"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Navigation">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                    <span class="breadcrumb">P2P</span>
+                </div>
+                <div class="top-bar-right">
+                    <div class="search-box" id="searchBox">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" placeholder="Search" id="searchInput">
+                    </div>
+                    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle Dark Mode">
+                        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    </button>
+                    <button class="notification-btn" id="notifBtn" aria-label="Notifications">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span class="notif-badge">3</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- P2P Trade Content -->
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h1>P2P Trade</h1>
+                    <div class="header-filters">
+                        <div class="filter-group">
+                            <input type="text" placeholder="Enter amount" class="filter-input" id="amountInput">
+                            <div class="filter-select" id="currencySelect">
+                                <div class="select-trigger">
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='10' fill='%2327ae60'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='10' font-weight='bold'%3E$%3C/text%3E%3C/svg%3E" alt="USD" class="currency-icon">
+                                    <span>USD</span>
+                                    <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+                                </div>
+                                <div class="select-dropdown">
+                                    <div class="select-option active" data-value="USD">USD</div>
+                                    <div class="select-option" data-value="EUR">EUR</div>
+                                    <div class="select-option" data-value="BRL">BRL</div>
+                                    <div class="select-option" data-value="GBP">GBP</div>
+                                    <div class="select-option" data-value="JPY">JPY</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-select" id="paymentSelect">
+                            <div class="select-trigger">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                                <span>Select payment method</span>
+                                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            <div class="select-dropdown">
+                                <div class="select-option active" data-value="all">All Payments</div>
+                                <div class="select-option" data-value="bank">Bank Transfer</div>
+                                <div class="select-option" data-value="pix">PIX</div>
+                                <div class="select-option" data-value="paypal">PayPal</div>
+                                <div class="select-option" data-value="wise">Wise</div>
+                            </div>
+                        </div>
+                        <div class="filter-select" id="regionSelect">
+                            <div class="select-trigger">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                <span>Select regions</span>
+                                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            <div class="select-dropdown">
+                                <div class="select-option active" data-value="all">All Regions</div>
+                                <div class="select-option" data-value="na">North America</div>
+                                <div class="select-option" data-value="sa">South America</div>
+                                <div class="select-option" data-value="eu">Europe</div>
+                                <div class="select-option" data-value="asia">Asia</div>
+                            </div>
+                        </div>
+                        <button class="filter-btn" id="filterBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                            <span>Filter</span>
+                        </button>
+                        <div class="export-wrapper" id="exportWrapper">
+                            <button class="export-btn" id="exportBtn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <span>Export</span>
+                                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="export-dropdown" id="exportDropdown">
+                                <button class="export-option" id="exportCSV">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                    <div class="export-option-info">
+                                        <span class="export-option-name">Export CSV</span>
+                                        <span class="export-option-desc">Spreadsheet format</span>
+                                    </div>
+                                </button>
+                                <button class="export-option" id="exportExcel">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2v4H8z"/><path d="M14 13h2v4h-2z"/><path d="M10 15h4"/></svg>
+                                    <div class="export-option-info">
+                                        <span class="export-option-name">Export Excel</span>
+                                        <span class="export-option-desc">Native .xlsx format</span>
+                                    </div>
+                                </button>
+                                <button class="export-option" id="exportPDF">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                                    <div class="export-option-info">
+                                        <span class="export-option-name">Export PDF</span>
+                                        <span class="export-option-desc">Printable report</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="kpi-cards" id="kpiCards">
+                    <div class="kpi-card">
+                        <div class="kpi-icon kpi-icon-traders">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiTraders">0</span>
+                            <span class="kpi-label">Active Traders</span>
+                        </div>
+                        <div class="kpi-trend up" id="kpiTradersTrend">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                            <span>+12%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon kpi-icon-price">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiAvgPrice">$0</span>
+                            <span class="kpi-label">Avg. Price</span>
+                        </div>
+                        <div class="kpi-trend neutral" id="kpiPriceTrend">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            <span>Stable</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon kpi-icon-rate">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiAvgRate">0%</span>
+                            <span class="kpi-label">Avg. Rate</span>
+                        </div>
+                        <div class="kpi-trend up" id="kpiRateTrend">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                            <span>+2.3%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon kpi-icon-orders">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiTotalOrders">0</span>
+                            <span class="kpi-label">Total Orders</span>
+                        </div>
+                        <div class="kpi-trend up" id="kpiOrdersTrend">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                            <span>+8.5%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crypto Tabs -->
+                <div class="crypto-tabs" id="cryptoTabs">
+                    <button class="crypto-tab" data-crypto="USDC">
+                        <div class="crypto-tab-icon usdc"><span>$</span></div>
+                        <div class="crypto-tab-info">
+                            <span class="crypto-tab-name">USDC</span>
+                            <span class="crypto-tab-count">362 Items</span>
+                        </div>
+                    </button>
+                    <button class="crypto-tab" data-crypto="ETH">
+                        <div class="crypto-tab-icon eth"><span>Ξ</span></div>
+                        <div class="crypto-tab-info">
+                            <span class="crypto-tab-name">ETH</span>
+                            <span class="crypto-tab-count">432 Items</span>
+                        </div>
+                    </button>
+                    <button class="crypto-tab active" data-crypto="BTC">
+                        <div class="crypto-tab-icon btc"><span>₿</span></div>
+                        <div class="crypto-tab-info">
+                            <span class="crypto-tab-name">BTC</span>
+                            <span class="crypto-tab-count">362 Items</span>
+                        </div>
+                    </button>
+                    <button class="crypto-tab" data-crypto="FDUSD">
+                        <div class="crypto-tab-icon fdusd"><span>F</span></div>
+                        <div class="crypto-tab-info">
+                            <span class="crypto-tab-name">FDUSD</span>
+                            <span class="crypto-tab-count">79 Items</span>
+                        </div>
+                    </button>
+                    <button class="crypto-tab" data-crypto="DOGE">
+                        <div class="crypto-tab-icon doge"><span>Ð</span></div>
+                        <div class="crypto-tab-info">
+                            <span class="crypto-tab-name">DOGE</span>
+                            <span class="crypto-tab-count">65 Items</span>
+                        </div>
+                    </button>
+                    <button class="crypto-tab" data-crypto="BNB">
+                        <div class="crypto-tab-icon bnb"><span>B</span></div>
+                        <div class="crypto-tab-info">
+                            <span class="crypto-tab-name">BNB</span>
+                            <span class="crypto-tab-count">32 Items</span>
+                        </div>
+                    </button>
+                    <button class="crypto-tab" data-crypto="BRD">
+                        <div class="crypto-tab-icon brd"><span>B</span></div>
+                        <div class="crypto-tab-info">
+                            <span class="crypto-tab-name">BRD</span>
+                            <span class="crypto-tab-count">62 Items</span>
+                        </div>
+                    </button>
+                    <button class="crypto-tab" data-crypto="CENNZ">
+                        <div class="crypto-tab-icon cennz"><span>C</span></div>
+                        <div class="crypto-tab-info">
+                            <span class="crypto-tab-name">CENNZ</span>
+                            <span class="crypto-tab-count">90 Items</span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <table class="trade-table" id="tradeTable">
+                        <thead>
+                            <tr>
+                                <th class="col-advertiser sortable" data-sort="name">Advertisers <span class="sort-icon"></span></th>
+                                <th class="col-price sortable current-sort asc" data-sort="price">Price <span class="sort-icon"></span></th>
+                                <th class="col-review sortable" data-sort="rate">Review &amp; Timing <span class="sort-icon"></span></th>
+                                <th class="col-payment sortable" data-sort="payment">Payment <span class="sort-icon"></span></th>
+                                <th class="col-limit sortable" data-sort="available">Available/Order Limit <span class="sort-icon"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Rows populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <div class="pagination-left">
+                        <span>Show rows per page</span>
+                        <div class="rows-select" id="rowsSelect">
+                            <div class="select-trigger">
+                                <span id="rowsValue">8</span>
+                                <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            <div class="select-dropdown rows-dropdown">
+                                <div class="select-option" data-value="5">5</div>
+                                <div class="select-option active" data-value="8">8</div>
+                                <div class="select-option" data-value="10">10</div>
+                                <div class="select-option" data-value="15">15</div>
+                                <div class="select-option" data-value="20">20</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pagination-right">
+                        <span id="paginationInfo">1-8 of 5</span>
+                        <div class="pagination-controls">
+                            <button class="page-btn" id="prevPage" aria-label="Previous Page" disabled>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+                            </button>
+                            <button class="page-btn" id="nextPage" aria-label="Next Page">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Buy Modal (Enriched) -->
+    <div class="modal-overlay" id="buyModal">
+        <div class="modal modal-enriched">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <h2>Buy <span id="modalCryptoName">BTC</span></h2>
+                </div>
+                <div class="modal-header-right">
+                    <button class="favorite-btn" id="favoriteBtn" aria-label="Toggle Favorite" title="Add to Watchlist">
+                        <svg class="star-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <svg class="star-filled" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </button>
+                    <button class="modal-close" id="modalClose" aria-label="Close Modal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Tabs -->
+            <div class="modal-tabs" id="modalTabs">
+                <button class="modal-tab active" data-tab="details">Details</button>
+                <button class="modal-tab" data-tab="history">Trade History</button>
+                <button class="modal-tab" data-tab="rating">Rating</button>
+            </div>
+
+            <!-- Tab: Details -->
+            <div class="modal-body modal-tab-content active" id="tabDetails" data-tab="details">
+                <div class="modal-seller">
+                    <div class="seller-avatar" id="modalAvatar">A</div>
+                    <div class="seller-info">
+                        <span class="seller-name" id="modalSellerName">AHASChanger</span>
+                        <span class="seller-stats" id="modalSellerStats">2307 orders | 97.30% completion</span>
+                    </div>
+                </div>
+
+                <!-- Sparkline Price Chart -->
+                <div class="sparkline-section">
+                    <span class="sparkline-label">Price range for <span id="sparklineCrypto">BTC</span></span>
+                    <div class="sparkline-container" id="sparklineContainer"></div>
+                    <div class="sparkline-range">
+                        <span id="sparklineMin">$0</span>
+                        <span id="sparklineMax">$0</span>
+                    </div>
+                </div>
+
+                <div class="modal-detail">
+                    <span class="detail-label">Price</span>
+                    <span class="detail-value" id="modalPrice">4,500 USD</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="detail-label">Available</span>
+                    <span class="detail-value" id="modalAvailable">0.01289031 BTC</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="detail-label">Order Limit</span>
+                    <span class="detail-value" id="modalLimit">10,000 USD - 60,000 USD</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="detail-label">Payment Method</span>
+                    <span class="detail-value" id="modalPayment">Bank Transfer</span>
+                </div>
+
+                <!-- Banks Accepted -->
+                <div class="banks-section">
+                    <span class="detail-label">Banks Accepted</span>
+                    <div class="bank-badges" id="modalBanks"></div>
+                </div>
+
+                <div class="modal-input-group">
+                    <label>I want to pay</label>
+                    <div class="modal-input-wrap">
+                        <input type="number" placeholder="0.00" id="payAmount" min="0">
+                        <span class="input-currency">USD</span>
+                    </div>
+                </div>
+                <div class="modal-input-group">
+                    <label>I will receive</label>
+                    <div class="modal-input-wrap">
+                        <input type="number" placeholder="0.00" id="receiveAmount" readonly>
+                        <span class="input-currency" id="receiveCurrency">BTC</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Trade History -->
+            <div class="modal-body modal-tab-content" id="tabHistory" data-tab="history">
+                <div class="trade-history-list" id="tradeHistoryList">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Tab: Rating -->
+            <div class="modal-body modal-tab-content" id="tabRating" data-tab="rating">
+                <div class="rating-breakdown" id="ratingBreakdown">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="modal-cancel" id="modalCancel">Cancel</button>
+                <button class="modal-confirm" id="modalConfirm">Buy BTC</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
