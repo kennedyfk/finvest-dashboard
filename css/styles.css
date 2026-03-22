@@ -1449,6 +1449,8 @@ body {
     font-size: 1.125rem;
     font-weight: 700;
     color: var(--text);
+    margin: 0;
+    line-height: 1.2;
 }
 
 .modal-close {
@@ -1478,6 +1480,12 @@ body {
     background: var(--bg);
     border-radius: var(--radius-sm);
     margin-bottom: 20px;
+}
+
+.modal-seller-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .seller-avatar {

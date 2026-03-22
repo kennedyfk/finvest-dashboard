@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=6">
+    <link rel="stylesheet" href="css/styles.css?v=9">
 </head>
 
 <body>
@@ -514,9 +514,14 @@
     <div class="modal-overlay" id="buyModal">
         <div class="modal modal-enriched">
             <div class="modal-header">
-                <div class="modal-header-left">
-                    <h2><span id="modalCryptoName">Detalhes da Operadora</span></h2>
-                    <span id="modalCryptoReg" style="font-size: 0.85rem; color: var(--text-muted); font-weight: normal; margin-top: 2px; display: block;"></span>
+                <div class="modal-header-left modal-seller-header">
+                    <div class="logo-container-wrapper">
+                        <div class="seller-avatar" id="modalAvatar">A</div>
+                    </div>
+                    <div class="seller-info">
+                        <span class="seller-name" id="modalSellerName">AHASChanger</span>
+                        <span class="seller-stats" id="modalSellerStats">ANS: 000000 | Ativa</span>
+                    </div>
                 </div>
                 <div class="modal-header-right">
                     <button class="favorite-btn" id="favoriteBtn" aria-label="Toggle Favorite" title="Add to Watchlist">
@@ -551,15 +556,7 @@
 
             <!-- Tab: Details -->
             <div class="modal-body modal-tab-content active" id="tabDetails" data-tab="details">
-                <div class="modal-seller">
-                    <div class="logo-container-wrapper">
-                        <div class="seller-avatar" id="modalAvatar">A</div>
-                    </div>
-                    <div class="seller-info">
-                        <span class="seller-name" id="modalSellerName">AHASChanger</span>
-                        <span class="seller-stats" id="modalSellerStats">2307 orders | 97.30% completion</span>
-                    </div>
-                </div>
+
 
                 <!-- Sparkline Price Chart -->
 
@@ -634,7 +631,7 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="js/app.js?v=8"></script>
+    <script src="js/app.js?v=9"></script>
 </body>
 
 </html>

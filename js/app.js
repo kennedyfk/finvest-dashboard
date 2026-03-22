@@ -465,13 +465,7 @@ function openBuyModal(index) {
 
     // Basic info
     const opName = op.Nome_Fantasia && op.Nome_Fantasia.trim() !== "" ? op.Nome_Fantasia : op.Razao_Social;
-    document.getElementById("modalCryptoName").textContent = opName;
-    const regAnsEl = document.getElementById("modalCryptoReg");
-    if (regAnsEl) {
-        // Format reg with leading zeros if it's less than 6 digits
-        const regFormatted = op.Registro_ANS.toString().padStart(6, '0');
-        regAnsEl.textContent = `Registro ANS: ${regFormatted}`;
-    }
+    const regFormatted = op.Registro_ANS.toString().padStart(6, '0');
     const initial = op.Nome_Fantasia ? op.Nome_Fantasia.charAt(0) : op.Razao_Social.charAt(0);
     // Try logo in modal too
     const logoPath = `assets/logos/${op.Registro_ANS}.png`;
@@ -488,8 +482,8 @@ function openBuyModal(index) {
     };
     img.src = logoPath;
 
-    document.getElementById("modalSellerName").textContent = op.Nome_Fantasia || op.Razao_Social;
-    document.getElementById("modalSellerStats").textContent = `ANS: ${op.Registro_ANS} | ${op.Status_Operadora}`;
+    document.getElementById("modalSellerName").textContent = opName;
+    document.getElementById("modalSellerStats").textContent = `ANS: ${regFormatted} | ${op.Status_Operadora}`;
     document.getElementById("modalPrice").textContent = formatCNPJ(op.CNPJ);
     document.getElementById("modalAvailable").textContent = op.Modalidade;
     document.getElementById("modalLimit").textContent = `${op.Cidade} - ${op.UF}`;
