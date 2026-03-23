@@ -1586,11 +1586,18 @@ body {
     padding: 10px 12px;
     background: var(--border-light);
     border-radius: var(--radius-sm);
-    transition: background var(--transition);
+    transition: background var(--transition), border-color var(--transition);
+    cursor: pointer;
+    border: 2px solid transparent;
 }
 
 .demo-metric-card:hover {
     background: var(--border);
+}
+
+.demo-metric-card.active {
+    border-color: var(--primary);
+    background: rgba(124, 58, 237, 0.08);
 }
 
 .demo-metric-icon {
@@ -1643,6 +1650,17 @@ body {
 
 .demo-chart-container svg {
     display: block;
+}
+
+.demo-chart-desc {
+    margin: 10px 0 0;
+    padding: 8px 12px;
+    font-size: 0.73rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    background: var(--border-light);
+    border-radius: var(--radius-xs);
+    border-left: 3px solid var(--primary);
 }
 
 @media (max-width: 480px) {
@@ -2683,4 +2701,48 @@ body {
     accent-color: var(--primary);
     cursor: pointer;
     flex-shrink: 0;
+}
+
+/* ---- Favorites ---- */
+.fav-star-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    color: var(--text-muted);
+    opacity: 0.3;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.fav-star-btn:hover {
+    opacity: 1;
+    color: #f59e0b;
+}
+
+.fav-star-btn.active {
+    opacity: 1;
+    color: #f59e0b;
+}
+
+.fav-filter-btn.active {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.fav-count {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.fav-clear-btn {
+    transition: all var(--transition);
+}
+
+.fav-clear-btn:hover {
+    color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.1) !important;
 }

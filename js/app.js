@@ -21,6 +21,28 @@ let currentViewData = [];
 // Dynamic beneficiary columns
 let selectedBenefColumns = ['qt_beneficiario_ativo'];
 
+// Favorites
+let favorites = new Set(JSON.parse(localStorage.getItem('finvest_favorites') || '[]'));
+let showFavoritesOnly = false;
+
+function saveFavorites() {
+    localStorage.setItem('finvest_favorites', JSON.stringify([...favorites]));
+}
+function toggleFavorite(regAns) {
+    if (favorites.has(regAns)) favorites.delete(regAns);
+    else favorites.add(regAns);
+    saveFavorites();
+    renderTable();
+    updateFavBtnState();
+}
+function updateFavBtnState() {
+    const btn = document.getElementById('favFilterBtn');
+    if (!btn) return;
+    btn.classList.toggle('active', showFavoritesOnly);
+    const count = favorites.size;
+    btn.querySelector('.fav-count').textContent = count > 0 ? `(${count})` : '';
+}
+
 const BENEF_COLUMN_LABELS = {
     qt_beneficiario_ativo: 'Benef. Ativos',
     qt_beneficiario_aderido: 'Benef. Aderidos',
@@ -289,6 +311,11 @@ function renderTable() {
         filteredData = filteredData.filter(op => op.Cidade && op.Cidade.toLowerCase().includes(cityQuery));
     }
 
+    // 3b. Favorites filter
+    if (showFavoritesOnly) {
+        filteredData = filteredData.filter(op => favorites.has(op.Registro_ANS));
+    }
+
     // 4. Global Search
     const query = (searchInput && searchInput.value) ? searchInput.value.toLowerCase().trim() : "";
     if (query) {
@@ -355,9 +382,15 @@ function renderTable() {
         const color = ["purple", "indigo", "blue", "pink", "green", "orange", "red", "teal"][index % 8];
         const logoPath = `assets/logos/${op.Registro_ANS}.png`;
 
+        const isFav = favorites.has(op.Registro_ANS);
         row.innerHTML = `
             <td>
                 <div class="advertiser-cell">
+                    <button class="fav-star-btn ${isFav ? 'active' : ''}" data-reg="${op.Registro_ANS}" title="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="${isFav ? 'currentColor' : 'none'}">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    </button>
                     <div class="logo-container-wrapper">
                         <div class="advertiser-avatar color-${color}" id="avatar-${op.Registro_ANS}">
                             ${initial}
@@ -416,7 +449,7 @@ function renderTable() {
             if (avatarDiv) {
                 avatarDiv.classList.add("logo-loaded");
                 avatarDiv.innerHTML = `<img src="${logoPath}" alt="${op.Nome_Fantasia}" style="width:auto; height:66%; border-radius:inherit; object-fit:contain;">`;
-                avatarDiv.style.background = "rgba(255, 255, 255, 0.00)";
+                avatarDiv.style.background = "rgba(255, 255, 255, 1.00)";
                 avatarDiv.style.border = "1px solid rgba(0, 0, 0, 0.05)";
             }
         };
@@ -436,6 +469,14 @@ function renderTable() {
         el.addEventListener("click", (e) => {
             const idx = parseInt(e.currentTarget.dataset.index);
             openBuyModal(idx);
+        });
+    });
+
+    // Bind favorite star buttons
+    document.querySelectorAll(".fav-star-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleFavorite(btn.dataset.reg);
         });
     });
 }
@@ -463,6 +504,18 @@ function openBuyModal(index) {
     document.querySelector('.modal-tab[data-tab="details"]').classList.add("active");
     document.getElementById("tabDetails").classList.add("active");
 
+    // Initialize favorite button state
+    const favBtn = document.getElementById("favoriteBtn");
+    if (favBtn) {
+        if (favorites.has(op.Registro_ANS)) {
+            favBtn.classList.add("active");
+            favBtn.title = "Remover dos favoritos";
+        } else {
+            favBtn.classList.remove("active");
+            favBtn.title = "Adicionar aos favoritos";
+        }
+    }
+
     // Basic info
     const opName = op.Nome_Fantasia && op.Nome_Fantasia.trim() !== "" ? op.Nome_Fantasia : op.Razao_Social;
     const regFormatted = op.Registro_ANS.toString().padStart(6, '0');
@@ -478,7 +531,7 @@ function openBuyModal(index) {
     img.onload = () => {
         modalAvatar.classList.add("logo-loaded");
         modalAvatar.innerHTML = `<img src="${logoPath}" alt="${op.Nome_Fantasia}" style="width:auto; height:66%; border-radius:inherit; object-fit:contain;">`;
-        modalAvatar.style.background = "rgba(255, 255, 255, 0.00)";
+        modalAvatar.style.background = "rgba(255, 255, 255, 1.00)";
     };
     img.src = logoPath;
 
@@ -527,6 +580,7 @@ function openBuyModal(index) {
 function populateDemografia(regAns) {
     const metricsGrid = document.getElementById("demoMetrics");
     const chartContainer = document.getElementById("demoChartContainer");
+    const chartTitle = document.querySelector(".demo-chart-title");
     const opData = beneficiaryData[regAns];
 
     if (!opData || Object.keys(opData).length === 0) {
@@ -544,28 +598,28 @@ function populateDemografia(regAns) {
     const refMM = latestDate.substring(5, 7);
     const refYYYY = latestDate.substring(0, 4);
 
-    // Key metrics for grid
+    // Key metrics for grid — each has a dataKey for chart selection
     const metrics = [
-        { label: 'Benef. Ativos', value: Number(latest.qt_beneficiario_ativo || 0).toLocaleString('pt-BR'), icon: '👥' },
-        { label: 'Aderidos', value: Number(latest.qt_beneficiario_aderido || 0).toLocaleString('pt-BR'), icon: '📈' },
-        { label: 'Cancelados', value: Number(latest.qt_beneficiario_cancelado || 0).toLocaleString('pt-BR'), icon: '📉' },
-        { label: 'Saldo', value: Number(latest.qt_beneficiario_saldo || 0).toLocaleString('pt-BR'), icon: '📊' },
-        { label: '% Ativos até 4 anos', value: `${parseFloat(latest.ativos_ate_4_anos_perc || 0).toFixed(2)}%`, icon: '👶' },
-        { label: '% Ativos até 14 anos', value: `${parseFloat(latest.ativos_ate_14_anos_perc || 0).toFixed(2)}%`, icon: '🧒' },
-        { label: '% Ativos Idosos', value: `${parseFloat(latest.ativos_idosos_perc || 0).toFixed(2)}%`, icon: '👴' },
-        { label: 'Dep. Idosos', value: parseFloat(latest.razao_dependencia_de_idosos || 0).toFixed(2), icon: '🏥' },
-        { label: 'Dep. Jovens', value: parseFloat(latest.razao_dependencia_de_jovens || 0).toFixed(2), icon: '🧑' },
-        { label: 'Índ. Envelhecimento', value: parseFloat(latest.indice_de_envelhecimento || 0).toFixed(2), icon: '📅' },
-        { label: 'Índ. Longevidade', value: parseFloat(latest.indice_de_longevidade || 0).toFixed(2), icon: '⏳' },
-        { label: 'Sexo 3ª Idade', value: parseFloat(latest.razao_sexo_terceira_idade || 0).toFixed(2), icon: '⚤' },
-        { label: 'Renov. Geracional', value: parseFloat(latest.razao_renovacao_geracional || 0).toFixed(2), icon: '🔄' },
-        { label: '% Idosos P. Indiv.', value: `${parseFloat(latest.idosos_plano_individual || 0).toFixed(2)}%`, icon: '🏠' },
+        { key: 'qt_beneficiario_ativo', label: 'Benef. Ativos', value: Number(latest.qt_beneficiario_ativo || 0).toLocaleString('pt-BR'), icon: '👥', desc: 'Quantidade de beneficiários com plano ativo na competência de referência.' },
+        { key: 'qt_beneficiario_aderido', label: 'Aderidos', value: Number(latest.qt_beneficiario_aderido || 0).toLocaleString('pt-BR'), icon: '📈', desc: 'Quantidade de novos beneficiários que aderiram a planos no período.' },
+        { key: 'qt_beneficiario_cancelado', label: 'Cancelados', value: Number(latest.qt_beneficiario_cancelado || 0).toLocaleString('pt-BR'), icon: '📉', desc: 'Quantidade de beneficiários que cancelaram seus planos no período.' },
+        { key: 'qt_beneficiario_saldo', label: 'Saldo', value: Number(latest.qt_beneficiario_saldo || 0).toLocaleString('pt-BR'), icon: '📊', desc: 'Diferença entre aderidos e cancelados no período (aderidos − cancelados).' },
+        { key: 'ativos_ate_4_anos_perc', label: '% Ativos até 4 anos', value: `${parseFloat(latest.ativos_ate_4_anos_perc || 0).toFixed(2)}%`, icon: '👶', desc: 'Percentual de beneficiários ativos com idade de 0 a 4 anos.' },
+        { key: 'ativos_ate_14_anos_perc', label: '% Ativos até 14 anos', value: `${parseFloat(latest.ativos_ate_14_anos_perc || 0).toFixed(2)}%`, icon: '🧒', desc: 'Percentual de beneficiários ativos com idade de 0 a 14 anos.' },
+        { key: 'ativos_idosos_perc', label: '% Ativos Idosos', value: `${parseFloat(latest.ativos_idosos_perc || 0).toFixed(2)}%`, icon: '👴', desc: 'Percentual de beneficiários ativos com 60 anos ou mais.' },
+        { key: 'razao_dependencia_de_idosos', label: 'Dep. Idosos', value: `${parseFloat(latest.razao_dependencia_de_idosos || 0).toFixed(2)}%`, icon: '🏥', desc: 'Razão entre a população idosa (60+) e a população em idade ativa (15–59 anos). Indica a pressão assistencial dos idosos.' },
+        { key: 'razao_dependencia_de_jovens', label: 'Dep. Jovens', value: `${parseFloat(latest.razao_dependencia_de_jovens || 0).toFixed(2)}%`, icon: '🧑', desc: 'Razão entre a população jovem (0–14 anos) e a população em idade ativa (15–59 anos).' },
+        { key: 'indice_de_envelhecimento', label: 'Índ. Envelhecimento', value: `${parseFloat(latest.indice_de_envelhecimento || 0).toFixed(2)}%`, icon: '📅', desc: 'Razão entre idosos (60+) e jovens (0–14 anos). Valores acima de 100 indicam mais idosos do que jovens na carteira.' },
+        { key: 'indice_de_longevidade', label: 'Índ. Longevidade', value: `${parseFloat(latest.indice_de_longevidade || 0).toFixed(2)}%`, icon: '⏳', desc: 'Percentual de beneficiários com 80 anos ou mais em relação ao total de idosos (60+). Indica o grau de longevidade da carteira.' },
+        { key: 'razao_sexo_terceira_idade', label: 'Sexo 3ª Idade', value: `${parseFloat(latest.razao_sexo_terceira_idade || 0).toFixed(2)}%`, icon: '⚤', desc: 'Razão entre homens e mulheres na faixa etária de 60 anos ou mais. Valores acima de 100 indicam mais mulheres idosas.' },
+        { key: 'razao_renovacao_geracional', label: 'Renov. Geracional', value: `${parseFloat(latest.razao_renovacao_geracional || 0).toFixed(2)}%`, icon: '🔄', desc: 'Razão entre beneficiários de 0–4 anos e os de 55–59 anos. Indica a capacidade de renovação etária da carteira.' },
+        { key: 'idosos_plano_individual', label: '% Idosos P. Indiv.', value: `${parseFloat(latest.idosos_plano_individual || 0).toFixed(2)}%`, icon: '🏠', desc: 'Percentual de idosos (60+) que possuem planos individuais ou familiares, em relação ao total de idosos.' },
     ];
 
     metricsGrid.innerHTML = `
         <div class="demo-ref-date">Ref: ${refMM}/${refYYYY}</div>
-        ${metrics.map(m => `
-            <div class="demo-metric-card">
+        ${metrics.map((m, i) => `
+            <div class="demo-metric-card${i === 0 ? ' active' : ''}" data-key="${m.key}" data-label="${m.label}" title="${m.desc}">
                 <span class="demo-metric-icon">${m.icon}</span>
                 <div class="demo-metric-info">
                     <span class="demo-metric-value">${m.value}</span>
@@ -575,11 +629,32 @@ function populateDemografia(regAns) {
         `).join('')}
     `;
 
-    // ---- LINE CHART ----
+    // Add click listeners to metric cards
+    const chartDesc = document.getElementById('demoChartDesc');
+    metricsGrid.querySelectorAll('.demo-metric-card').forEach(card => {
+        card.addEventListener('click', () => {
+            metricsGrid.querySelectorAll('.demo-metric-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            const key = card.dataset.key;
+            const label = card.dataset.label;
+            if (chartTitle) chartTitle.textContent = `Evolução de ${label}`;
+            if (chartDesc) chartDesc.textContent = card.getAttribute('title') || '';
+            renderDemoChart(key, opData, dates, chartContainer);
+        });
+    });
+
+    // Render default chart
+    if (chartTitle) chartTitle.textContent = 'Evolução de Benef. Ativos';
+    const defaultCard = metricsGrid.querySelector('.demo-metric-card.active');
+    if (chartDesc && defaultCard) chartDesc.textContent = defaultCard.getAttribute('title') || '';
+    renderDemoChart('qt_beneficiario_ativo', opData, dates, chartContainer);
+}
+
+function renderDemoChart(dataKey, opData, dates, chartContainer) {
     const chartData = dates.map(d => ({
         date: d,
         label: `${d.substring(5, 7)}/${d.substring(2, 4)}`,
-        value: Number(opData[d].qt_beneficiario_ativo || 0)
+        value: Number(opData[d][dataKey] || 0)
     }));
 
     if (chartData.length < 2) {
@@ -614,7 +689,7 @@ function populateDemografia(regAns) {
     for (let i = 0; i <= yTicks; i++) {
         const val = minVal + (range * i / yTicks);
         const y = padT + plotH - (i / yTicks) * plotH;
-        const formattedVal = val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val.toFixed(0);
+        const formattedVal = val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val.toFixed(2);
         yLabels += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" fill="var(--text-muted)" font-size="10">${formattedVal}</text>`;
         gridLines += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="var(--border)" stroke-dasharray="3,3" opacity="0.5"/>`;
     }
@@ -627,7 +702,7 @@ function populateDemografia(regAns) {
         xLabels += `<text x="${points[i].x}" y="${H - 6}" text-anchor="middle" fill="var(--text-muted)" font-size="10">${points[i].label}</text>`;
     }
 
-    // Dots + invisible hover targets
+    // Dots + tooltips
     const dots = points.map(p => `
         <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="var(--primary)" stroke="#fff" stroke-width="1.5"/>
         <title>${p.label}: ${p.value.toLocaleString('pt-BR')}</title>
@@ -852,24 +927,6 @@ function getFavorites() {
         return [];
     }
 }
-
-function isFavorite(name) {
-    return getFavorites().includes(name);
-}
-
-function toggleFavorite(name) {
-    let favs = getFavorites();
-    if (favs.includes(name)) {
-        favs = favs.filter(n => n !== name);
-        showToast(`${name} removed from Watchlist`, "info");
-    } else {
-        favs.push(name);
-        showToast(`${name} added to Watchlist ★`, "success");
-    }
-    localStorage.setItem("finvest-favorites", JSON.stringify(favs));
-}
-
-
 // ---- TOAST NOTIFICATIONS ----
 function showToast(message, type = "info") {
     const toast = document.createElement("div");
@@ -957,6 +1014,34 @@ function initEventListeners() {
     filterUFList.addEventListener('change', () => {
         updateTriggerText(filterUFWrapper, 'Todos os Estados');
     });
+
+    // Favorites toggle and clear
+    const favFilterBtn = document.getElementById('favFilterBtn');
+    const favClearBtn = document.getElementById('favClearBtn');
+
+    if (favFilterBtn) {
+        updateFavBtnState();
+        favFilterBtn.addEventListener('click', () => {
+            showFavoritesOnly = !showFavoritesOnly;
+            currentPage = 1;
+            renderTable();
+            updateFavBtnState();
+        });
+    }
+
+    if (favClearBtn) {
+        favClearBtn.addEventListener('click', () => {
+            if (favorites.size === 0) return;
+            if (confirm("Tem certeza que deseja limpar todos os favoritos?")) {
+                favorites.clear();
+                saveFavorites();
+                showFavoritesOnly = false;
+                currentPage = 1;
+                renderTable();
+                updateFavBtnState();
+            }
+        });
+    }
 
     if (filterBtn) {
         filterBtn.addEventListener("click", () => {
@@ -1122,7 +1207,7 @@ function initEventListeners() {
             const page = item.dataset.page;
             document.querySelector(".breadcrumb").textContent = item.querySelector("span").textContent;
 
-            if (page !== "p2p") {
+            if (page !== "Operadoras de Saúde") {
                 showToast(`Navigated to ${item.querySelector("span").textContent}`, "info");
             }
 
@@ -1158,10 +1243,18 @@ function initEventListeners() {
     // Favorite Button
     document.getElementById("favoriteBtn").addEventListener("click", () => {
         if (!currentModalTrader) return;
-        toggleFavorite(currentModalTrader.name);
+        toggleFavorite(currentModalTrader.Registro_ANS);
         const favBtn = document.getElementById("favoriteBtn");
-        favBtn.classList.toggle("active");
-        favBtn.title = favBtn.classList.contains("active") ? "Remove from Watchlist" : "Add to Watchlist";
+        const isFav = favorites.has(currentModalTrader.Registro_ANS);
+        if (isFav) {
+            favBtn.classList.add("active");
+            favBtn.title = "Remover dos favoritos";
+            showToast(`${currentModalTrader.Nome_Fantasia || currentModalTrader.Razao_Social} adicionado aos favoritos ★`, "success");
+        } else {
+            favBtn.classList.remove("active");
+            favBtn.title = "Adicionar aos favoritos";
+            showToast(`${currentModalTrader.Nome_Fantasia || currentModalTrader.Razao_Social} removido dos favoritos`, "info");
+        }
     });
 
     // Search
