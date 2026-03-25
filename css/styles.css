@@ -132,10 +132,102 @@ body {
     gap: 10px;
 }
 
-.logo-icon {
+.logo-icon-btn {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.logo-icon-btn:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+/* Radar Layout & Table */
+.radar-content {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.radar-canvas-wrapper {
+    flex: 1;
+    min-width: 320px;
+    height: 340px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.radar-table-container {
+    flex: 1.2;
+    min-width: 320px;
+}
+
+.radar-metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.radar-metrics-table th {
+    text-align: right;
+    padding: 10px 12px;
+    font-weight: 600;
+    border-bottom: 1.5px solid var(--border);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.radar-metrics-table th:first-child {
+    text-align: left;
+}
+
+.radar-metrics-table td {
+    text-align: right;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-light);
+    font-variant-numeric: tabular-nums;
+}
+
+.radar-metrics-table tr:last-child td {
+    border-bottom: none;
+}
+
+.radar-metrics-table .metric-label {
+    text-align: left;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg);
+    border-radius: 4px;
+    padding-left: 10px;
+}
+
+.radar-metrics-table tr:hover td {
+    background: rgba(247, 75, 75, 0.03);
+}
+
+[data-theme="dark"] .radar-metrics-table tr:hover td {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+@media (max-width: 1100px) {
+    .radar-content {
+        flex-direction: column;
+    }
+    .radar-canvas-wrapper, .radar-table-container {
+        width: 100%;
+    }
 }
 
 .logo-text {
@@ -143,6 +235,70 @@ body {
     font-weight: 700;
     color: #ffffff;
     letter-spacing: -0.02em;
+    transition: opacity var(--transition), width var(--transition);
+}
+
+.sidebar-collapse-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.sidebar-collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.sidebar-collapse-btn svg {
+    transition: transform 0.3s ease;
+}
+
+/* Collapsed State */
+.sidebar.collapsed {
+    width: 68px;
+    min-width: 68px;
+}
+
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .nav-section-title,
+.sidebar.collapsed .nav-item span,
+.sidebar.collapsed .user-info,
+.sidebar.collapsed .user-menu-btn {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 20px 10px;
+}
+
+.sidebar.collapsed .logo-icon-btn {
+    transform: none;
+}
+
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 10px;
+}
+
+.sidebar.collapsed .user-profile {
+    justify-content: center;
+    padding: 10px;
 }
 
 .sidebar-nav {

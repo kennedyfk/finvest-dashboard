@@ -173,10 +173,16 @@ function formatPercent(num) {
 function renderCards() {
     const grid = document.getElementById("compareGrid");
     const tagsBox = document.getElementById("compareSelectedTags");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+
     grid.innerHTML = "";
     tagsBox.innerHTML = "";
 
     document.getElementById("compareCountMsg").textContent = `${selectedOperators.length}/${MAX_COMPARE} selecionadas`;
+
+    if (clearAllBtn) {
+        clearAllBtn.style.display = selectedOperators.length > 0 ? "block" : "none";
+    }
 
     if (selectedOperators.length === 0) {
         grid.innerHTML = `
@@ -390,10 +396,19 @@ function renderCharts() {
 
     chartsContainer.style.display = "block";
 
-    const labels = selectedOperators.map(op => {
+    const operatorLabels = selectedOperators.map(op => {
         const name = op.Nome_Fantasia || op.Razao_Social || op.Registro_ANS.toString();
         return name.length > 20 ? name.substring(0, 20) + "..." : name;
     });
+
+    // 1. Determine X-axis labels (Sorted Dates)
+    const allDatesSet = new Set();
+    selectedOperators.forEach(op => {
+        const history = globalBenefData[op.Registro_ANS] || {};
+        Object.keys(history).forEach(d => allDatesSet.add(d));
+    });
+    const sortedDates = Array.from(allDatesSet).sort();
+    const dateLabels = sortedDates.map(d => `${d.substring(5, 7)}/${d.substring(2, 4)}`);
 
     const isDark = document.documentElement.getAttribute("data-theme") === "dark";
     const textColor = isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)";
@@ -403,38 +418,55 @@ function renderCharts() {
         Chart.defaults.color = textColor;
         Chart.defaults.font.family = "'Inter', sans-serif";
 
-        // 1. Bar Chart (Total Beneficiarios)
-        const ctxBar = document.getElementById('barChart').getContext('2d');
+        // 1. Line Chart (Evolution) - Replaces the old bar chart
+        const ctxEvolution = document.getElementById('barChart').getContext('2d');
         if (barChartInstance) barChartInstance.destroy();
 
-        barChartInstance = new Chart(ctxBar, {
-            type: 'bar',
+        const datasets = selectedOperators.map((op, idx) => {
+            const name = operatorLabels[idx];
+            const history = globalBenefData[op.Registro_ANS] || {};
+            
+            return {
+                label: name,
+                data: sortedDates.map(d => history[d] ? history[d].qt_beneficiario_ativo || 0 : null),
+                borderColor: CHART_COLORS[idx % CHART_COLORS.length],
+                backgroundColor: CHART_BG_COLORS[idx % CHART_BG_COLORS.length],
+                borderWidth: 2,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                tension: 0.3,
+                fill: true
+            };
+        });
+
+        barChartInstance = new Chart(ctxEvolution, {
+            type: 'line',
             data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Beneficiários Ativos',
-                    data: selectedOperators.map(op => op.qt_beneficiario_ativo || 0),
-                    backgroundColor: CHART_COLORS.slice(0, selectedOperators.length),
-                    borderWidth: 0,
-                    borderRadius: 6
-                }]
+                labels: dateLabels,
+                datasets: datasets
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend: { 
+                        display: true,
+                        position: 'top',
+                        labels: { boxWidth: 12, usePointStyle: true, font: { size: 10 } }
+                    },
                     tooltip: {
+                        mode: 'index',
+                        intersect: false,
                         callbacks: {
                             label: function (context) {
-                                return " " + context.raw.toLocaleString('pt-BR') + " vidas";
+                                return " " + context.dataset.label + ": " + context.raw.toLocaleString('pt-BR') + " vidas";
                             }
                         }
                     }
                 },
                 scales: {
                     y: {
-                        beginAtZero: true,
+                        beginAtZero: false,
                         grid: { color: gridColor },
                         ticks: {
                             callback: function (value) {
@@ -478,19 +510,52 @@ function renderCharts() {
             const normalizedData = radarMetrics.map(m => ((op[m.key] || 0) / radarMax[m.key]) * 100);
 
             return {
-                label: labels[idx],
+                label: operatorLabels[idx],
                 data: normalizedData,
                 rawData: rawData, // for tooltip
-                backgroundColor: CHART_BG_COLORS[idx],
-                borderColor: CHART_COLORS[idx],
-                pointBackgroundColor: CHART_COLORS[idx],
+                backgroundColor: CHART_BG_COLORS[idx % CHART_BG_COLORS.length],
+                borderColor: CHART_COLORS[idx % CHART_COLORS.length],
+                pointBackgroundColor: CHART_COLORS[idx % CHART_COLORS.length],
                 pointBorderColor: '#fff',
                 pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: CHART_COLORS[idx],
+                pointHoverBorderColor: CHART_COLORS[idx % CHART_COLORS.length],
                 borderWidth: 2,
                 fill: true
             };
         });
+
+        const radarOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: gridColor },
+                    grid: { color: gridColor },
+                    pointLabels: { color: textColor, font: { size: 10, weight: '500' } },
+                    ticks: { display: false, stepSize: 20 },
+                    suggestedMin: 0,
+                    suggestedMax: 105
+                }
+            },
+            plugins: {
+                legend: { position: 'bottom', labels: { color: textColor, padding: 15, boxWidth: 12 } },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const ds = context.dataset;
+                            const metric = radarMetrics[context.dataIndex];
+                            const raw = ds.rawData[context.dataIndex];
+                            let formatted = raw;
+                            if (metric.label.includes('%')) formatted = formatPercent(raw);
+                            else if (metric.key.startsWith('razao_') || metric.key.startsWith('indice_')) 
+                                formatted = raw.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            else formatted = formatNumber(raw);
+                            return `${ds.label}: ${formatted}`;
+                        }
+                    }
+                }
+            }
+        };
 
         radarChartInstance = new Chart(ctxRadar, {
             type: 'radar',
@@ -498,32 +563,51 @@ function renderCharts() {
                 labels: radarMetrics.map(m => m.label),
                 datasets: radarDatasets
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        angleLines: { color: gridColor },
-                        grid: { color: gridColor },
-                        pointLabels: { color: textColor, font: { size: 10, weight: '500' } },
-                        ticks: { display: false },
-                        min: 0,
-                        max: 100
-                    }
-                },
-                plugins: {
-                    legend: { position: 'bottom', labels: { color: textColor, padding: 15, boxWidth: 12 } },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                const rawVal = context.dataset.rawData[context.dataIndex];
-                                return context.dataset.label + ": " + rawVal.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-                            }
-                        }
-                    }
-                }
-            }
+            options: radarOptions
         });
+
+        // 3. Radar Metrics Table
+        const tableContainer = document.getElementById('radarTableContainer');
+        if (tableContainer) {
+            let tableHtml = `
+                <table class="radar-metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Indicador</th>
+                            ${selectedOperators.map((op, idx) => `
+                                <th style="color: ${CHART_COLORS[idx % CHART_COLORS.length]}">
+                                    ${operatorLabels[idx]}
+                                </th>
+                            `).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            radarMetrics.forEach(m => {
+                tableHtml += `
+                    <tr>
+                        <td class="metric-label">${m.label}</td>
+                        ${selectedOperators.map(op => {
+                            const val = op[m.key] || 0;
+                            let formatted = "";
+                            if (m.label.includes('%')) formatted = formatPercent(val);
+                            else if (m.key.startsWith('razao_') || m.key.startsWith('indice_')) 
+                                formatted = val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            else formatted = formatNumber(val);
+                            
+                            return `<td>${formatted}</td>`;
+                        }).join('')}
+                    </tr>
+                `;
+            });
+
+            tableHtml += `
+                    </tbody>
+                </table>
+            `;
+            tableContainer.innerHTML = tableHtml;
+        }
     }
 }
 
@@ -611,6 +695,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("compareInput").addEventListener("focus", () => {
         document.getElementById("compareDropdown").classList.add("active");
     });
+
+    const clearAllBtn = document.getElementById("clearAllBtn");
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener("click", () => {
+            if (selectedOperators.length > 0) {
+                if (confirm("Deseja remover todas as operadoras selecionadas?")) {
+                    selectedOperators = [];
+                    saveCompareData();
+                    renderCards();
+                }
+            }
+        });
+    }
 
     // Load navbar and modal
     await Promise.all([
