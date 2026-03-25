@@ -317,42 +317,36 @@
                         </div>
                         <div class="crypto-tab-info">
                             <span class="crypto-tab-name">Todas</span>
-                            <span class="crypto-tab-count">Operadoras</span>
                         </div>
                     </button>
                     <button class="crypto-tab" data-modalidade="Medicina de Grupo">
                         <div class="crypto-tab-icon med"><span>✚</span></div>
                         <div class="crypto-tab-info">
                             <span class="crypto-tab-name">Medicina de Grupo</span>
-                            <span class="crypto-tab-count">Operadoras</span>
                         </div>
                     </button>
                     <button class="crypto-tab" data-modalidade="Autogestão">
                         <div class="crypto-tab-icon aut"><span>🏠</span></div>
                         <div class="crypto-tab-info">
                             <span class="crypto-tab-name">Autogestão</span>
-                            <span class="crypto-tab-count">Operadoras</span>
                         </div>
                     </button>
                     <button class="crypto-tab" data-modalidade="Seguradora Especializada em Saúde">
                         <div class="crypto-tab-icon adm"><span>📋</span></div>
                         <div class="crypto-tab-info">
                             <span class="crypto-tab-name">Seguradora</span>
-                            <span class="crypto-tab-count">Operadoras</span>
                         </div>
                     </button>
                     <button class="crypto-tab" data-modalidade="Cooperativa Médica">
                         <div class="crypto-tab-icon coo"><span>🤝</span></div>
                         <div class="crypto-tab-info">
                             <span class="crypto-tab-name">Cooperativa</span>
-                            <span class="crypto-tab-count">Operadoras</span>
                         </div>
                     </button>
                     <button class="crypto-tab" data-modalidade="Filantropia">
                         <div class="crypto-tab-icon fil"><span>♥</span></div>
                         <div class="crypto-tab-info">
                             <span class="crypto-tab-name">Filantropia</span>
-                            <span class="crypto-tab-count">Operadoras</span>
                         </div>
                     </button>
                 </div>
@@ -363,10 +357,6 @@
                         <thead>
                             <tr>
                                 <th class="col-advertiser sortable" data-sort="Razao_Social">Operadora <span
-                                        class="sort-icon"></span></th>
-                                <th class="col-price sortable" data-sort="CNPJ">CNPJ <span class="sort-icon"></span>
-                                </th>
-                                <th class="col-review sortable" data-sort="Status_Operadora">Status Operadora <span
                                         class="sort-icon"></span></th>
                                 <th class="col-payment sortable" data-sort="Modalidade">Modalidade <span
                                         class="sort-icon"></span></th>
@@ -465,8 +455,6 @@
                                     value="Seguradora Especializada em Saúde"> Seguradora Especializada em Saúde</label>
                             <label class="filter-checkbox-item"><input type="checkbox" value="Filantropia">
                                 Filantropia</label>
-                            <label class="filter-checkbox-item"><input type="checkbox"
-                                    value="Seguradora Especializada em Saúde"> Seguradora Especializada em Saúde</label>
                         </div>
                     </div>
                 </div>
@@ -537,122 +525,8 @@
         </div>
     </div>
 
-    <!-- Buy Modal (Enriched) -->
-    <div class="modal-overlay" id="buyModal">
-        <div class="modal modal-enriched">
-            <div class="modal-header">
-                <div class="modal-header-left modal-seller-header">
-                    <div class="logo-container-wrapper">
-                        <div class="seller-avatar" id="modalAvatar">A</div>
-                    </div>
-                    <div class="seller-info">
-                        <span class="seller-name" id="modalSellerName">AHASChanger</span>
-                        <span class="seller-stats" id="modalSellerStats">ANS: 000000 | Ativa</span>
-                    </div>
-                </div>
-                <div class="modal-header-right">
-                    <button class="favorite-btn" id="favoriteBtn" aria-label="Toggle Favorite" title="Add to Watchlist">
-                        <svg class="star-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            width="20" height="20">
-                            <polygon
-                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                        <svg class="star-filled" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"
-                            stroke-width="2" width="20" height="20">
-                            <polygon
-                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                        </svg>
-                    </button>
-                    <button class="modal-close" id="modalClose" aria-label="Close Modal">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"
-                            height="20">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Modal Tabs -->
-            <div class="modal-tabs" id="modalTabs">
-                <button class="modal-tab active" data-tab="details">Detalhes</button>
-                <button class="modal-tab" data-tab="Demografia">Demografia</button>
-                <button class="modal-tab" data-tab="rn518">Indicadores RN518</button>
-                <button class="modal-tab" data-tab="cbr">Indicadores CBR</button>
-            </div>
-
-            <!-- Tab: Details -->
-            <div class="modal-body modal-tab-content active" id="tabDetails" data-tab="details">
-
-
-                <!-- Sparkline Price Chart -->
-
-                <div class="modal-detail">
-                    <span class="detail-label">CNPJ</span>
-                    <span class="detail-value" id="modalPrice">00.000.000/0001-00</span>
-                </div>
-                <div class="modal-detail">
-                    <span class="detail-label">Modalidade</span>
-                    <span class="detail-value" id="modalAvailable">Modalidade</span>
-                </div>
-                <div class="modal-detail">
-                    <span class="detail-label">Localização</span>
-                    <span class="detail-value" id="modalLimit">Cidade - UF</span>
-                </div>
-                <div class="modal-detail">
-                    <span class="detail-label">Website</span>
-                    <span class="detail-value" id="modalPayment">www.exemplo.com.br</span>
-                </div>
-
-
-                <div class="modal-disclaimer">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="16" x2="12" y2="12" />
-                        <line x1="12" y1="8" x2="12.01" y2="8" />
-                    </svg>
-                    <span>Informações extraídas do FTP dos Dados Abertos da <br><a
-                            href="https://dadosabertos.ans.gov.br/FTP/PDA/operadoras_de_plano_de_saude_ativas/"
-                            target="_blank" rel="noopener">ANS — dadosabertos.ans.gov.br</a>.</span>
-                </div>
-            </div>
-
-            <!-- Tab: Trade History -->
-            <div class="modal-body modal-tab-content" id="Demografia" data-tab="Demografia">
-                <div class="demo-metrics-grid" id="demoMetrics">
-                    <!-- Populated by JS -->
-                </div>
-                <div class="demo-chart-section">
-                    <div class="demo-chart-header">
-                        <span class="demo-chart-title">Evolução de Beneficiários Ativos</span>
-                    </div>
-                    <div class="demo-chart-container" id="demoChartContainer">
-                        <!-- SVG chart populated by JS -->
-                    </div>
-                    <p class="demo-chart-desc" id="demoChartDesc"></p>
-                </div>
-            </div>
-
-            <!-- Tab: RN 518 -->
-            <div class="modal-body modal-tab-content" id="rn518" data-tab="rn518">
-                <div class="rating-breakdown" id="ratingBreakdown">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <!-- Tab: CBR -->
-            <div class="modal-body modal-tab-content" id="cbr" data-tab="cbr">
-                <div class="rating-breakdown" id="ratingBreakdown">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <!-- <button class="modal-cancel" id="modalCancel">Fechar</button> -->
-                <button class="modal-confirm" id="modalConfirm">OK</button>
-            </div>
-        </div>
-    </div>
+    <!-- Buy Modal mapped to Component -->
+    <div id="operatorModalContainer"></div>
 
     <!-- Toast Notification -->
     <div class="toast-container" id="toastContainer"></div>
@@ -660,6 +534,7 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="js/app.js?v=15"></script>
+    <script src="js/components/operator_modal.js"></script>
 </body>
 
 </html>

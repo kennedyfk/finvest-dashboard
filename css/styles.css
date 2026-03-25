@@ -102,10 +102,7 @@ body {
     overflow: hidden;
 }
 
-/* Sidebar Container (for dynamic loading) */
-#sidebarContainer {
-    display: contents;
-}
+/* Removed sidebarContainer since outerHTML replaces it */
 
 /* ===========================
    Sidebar
@@ -113,18 +110,15 @@ body {
 .sidebar {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
+    min-height: 0; /* Fix para Firefox: impede que cresça além do contêiner */
     background: linear-gradient(180deg, #1e1b4b 0%, #1a1a2e 100%);
     display: flex;
     flex-direction: column;
     transition: transform var(--transition), width var(--transition);
     z-index: 100;
-    overflow-y: auto;
+    height: 100vh;
+    overflow-y: hidden;
     overflow-x: hidden;
-    scrollbar-width: none;
-}
-
-.sidebar::-webkit-scrollbar {
-    display: none;
 }
 
 .sidebar-header {
@@ -154,6 +148,19 @@ body {
 .sidebar-nav {
     flex: 1;
     padding: 8px 12px;
+    overflow-y: auto;
+    min-height: 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
 }
 
 .nav-section {
@@ -450,7 +457,7 @@ body {
 .content-wrapper {
     flex: 1;
     overflow-y: auto;
-    padding: 24px 28px;
+    padding: 24px 20px;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
 }
@@ -877,8 +884,8 @@ body {
 .crypto-tab {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
+    gap: 8px;
+    padding: 6px 14px;
     background: var(--card-bg);
     border: 2px solid transparent;
     border-radius: var(--radius);
@@ -902,13 +909,13 @@ body {
 }
 
 .crypto-tab-icon {
-    width: 36px;
-    height: 36px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #fff;
 }
@@ -952,7 +959,7 @@ body {
 }
 
 .crypto-tab-name {
-    font-size: 0.81rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--text);
 }
@@ -979,9 +986,10 @@ body {
 }
 
 /* Fixed column widths — prevent resizing when dynamic columns are added */
+
 .col-advertiser {
-    width: 300px;
-    min-width: 300px;
+    width: 360px;
+    min-width: 360px;
 }
 
 .col-price {
@@ -995,13 +1003,13 @@ body {
 }
 
 .col-payment {
-    width: 200px;
-    min-width: 200px;
+    width: 180px;
+    min-width: 180px;
 }
 
 .col-limit {
-    width: 130px;
-    min-width: 130px;
+    width: 150px;
+    min-width: 150px;
 }
 
 .col-beneficiary {
@@ -1010,8 +1018,8 @@ body {
 }
 
 .trade-table thead th {
-    padding: 14px 16px;
-    font-size: 0.75rem;
+    padding: 12px 14px;
+    font-size: 0.7rem;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -1082,7 +1090,7 @@ body {
 .advertiser-cell {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .advertiser-avatar {
@@ -1101,22 +1109,24 @@ body {
     transition: all 0.3s ease;
 }
 
-.logo-container-wrapper {
+.advertiser-logo {
     width: 64px;
     height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #fff;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xs);
+    overflow: hidden;
     flex-shrink: 0;
+    padding: 2px;
 }
 
-.advertiser-avatar.logo-loaded {
-    width: 64px;
-    height: 38px;
-    border-radius: 6px;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    padding: 2px;
+.advertiser-logo img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 .advertiser-avatar.color-purple {
@@ -1162,7 +1172,7 @@ body {
     align-items: center;
     gap: 6px;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.81rem;
     color: var(--text);
 }
 
@@ -1206,7 +1216,6 @@ body {
 }
 
 @keyframes pulse {
-
     0%,
     100% {
         opacity: 1;
@@ -1215,6 +1224,36 @@ body {
     50% {
         opacity: 0.5;
     }
+}
+
+/* Modalidade Cell */
+.modalidade-cell {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.modalidade-badge {
+    display: inline-block;
+    padding: 2px 0;
+}
+
+/* Location Cell */
+.location-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.location-city {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.location-uf {
+    font-size: 0.68rem;
+    color: var(--text-muted);
 }
 
 /* Price Cell */
@@ -2745,4 +2784,30 @@ body {
 .fav-clear-btn:hover {
     color: #ef4444 !important;
     background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Status Badges */
+.cc-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    margin-top: 4px;
+    background: var(--bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    width: fit-content;
+}
+
+.cc-badge.ativa {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+    border-color: transparent;
+}
+
+.cc-badge.cancelada {
+    background: rgba(156, 163, 175, 0.1);
+    color: var(--text-muted);
+    border-color: transparent;
 }

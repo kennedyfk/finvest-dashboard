@@ -4,31 +4,28 @@
 // ===========================
 
 // ---- STATE ----
-let operatorsData = {}; // Was tradersData
-let beneficiaryData = {}; // Beneficiary data keyed by Registro ANS
-let globalBenefRefDate = ''; // Global most recent date across ALL operators
-let currentModalidade = "all"; // Use "all" as global default or MEDICINA
+let operatorsData = {};
+let beneficiaryData = {};
+let globalBenefRefDate = '';
+let currentModalidade = "all";
 let statusFilter = "ATIVA";
-let filterUFs = [];  // array of selected UFs (empty = all)
-let filterModalities = [];  // array of selected modalities (empty = all)
+let filterUFs = [];
+let filterModalities = [];
 let filterCity = "";
 let currentPage = 1;
 let rowsPerPage = 10;
 let sortCol = "qt_beneficiario_ativo";
 let sortAsc = false;
 let currentViewData = [];
-
-// Dynamic beneficiary columns
 let selectedBenefColumns = ['qt_beneficiario_ativo'];
-
-// Favorites
-let favorites = new Set(JSON.parse(localStorage.getItem('finvest_favorites') || '[]'));
+let favorites = new Set(JSON.parse(localStorage.getItem('finvest_favorites') || '[]').filter(x => x !== null && x !== undefined));
 let showFavoritesOnly = false;
 
 function saveFavorites() {
     localStorage.setItem('finvest_favorites', JSON.stringify([...favorites]));
 }
 function toggleFavorite(regAns) {
+    if (!regAns) return;
     if (favorites.has(regAns)) favorites.delete(regAns);
     else favorites.add(regAns);
     saveFavorites();
@@ -41,6 +38,40 @@ function updateFavBtnState() {
     btn.classList.toggle('active', showFavoritesOnly);
     const count = favorites.size;
     btn.querySelector('.fav-count').textContent = count > 0 ? `(${count})` : '';
+}
+
+// ---- HELPERS ----
+function formatCNPJ(cnpj) {
+    if (!cnpj) return "";
+    const clean = cnpj.toString().replace(/\D/g, "");
+    if (clean.length !== 14) return cnpj;
+    return clean.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+}
+
+function formatNumber(num) {
+    if (num === null || num === undefined || num === '' || isNaN(num)) return '—';
+    return Number(num).toLocaleString('pt-BR');
+}
+
+function formatPrice(price) {
+    if (price >= 1000) {
+        return price.toLocaleString("en-US");
+    }
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function findGlobalMaxDate() {
+    let maxDate = '';
+    Object.values(beneficiaryData).forEach(opDates => {
+        Object.keys(opDates).forEach(date => {
+            if (date > maxDate) maxDate = date;
+        });
+    });
+    return maxDate;
+}
+
+function closeBuyModal() {
+    if (buyModal) buyModal.classList.remove("active");
 }
 
 const BENEF_COLUMN_LABELS = {
@@ -60,41 +91,14 @@ const BENEF_COLUMN_LABELS = {
     idosos_plano_individual: '% Idosos P.I.'
 };
 
-// ---- HELPERS ----
-function formatCNPJ(cnpj) {
-    if (!cnpj) return "";
-    const clean = cnpj.toString().replace(/\D/g, "");
-    if (clean.length !== 14) return cnpj;
-    return clean.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
-}
-
-function formatNumber(num) {
-    if (num === null || num === undefined || num === '' || isNaN(num)) return '—';
-    return Number(num).toLocaleString('pt-BR');
-}
-
-// Find the global most recent date across ALL operators in beneficiaryData
-function findGlobalMaxDate() {
-    let maxDate = '';
-    Object.values(beneficiaryData).forEach(opDates => {
-        Object.keys(opDates).forEach(date => {
-            if (date > maxDate) maxDate = date;
-        });
-    });
-    return maxDate;
-}
-
-// ---- COMPONENT LOADER ----
 async function loadComponent(url, targetId) {
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Failed to load ${url}`);
         const html = await response.text();
-        document.getElementById(targetId).innerHTML = html;
+        document.getElementById(targetId).outerHTML = html;
     } catch (err) {
         console.warn(`Component load failed for ${url}:`, err.message);
-        // Fallback: try relative path variations
-        console.log("Component will need a local server to load. Using inline fallback if available.");
     }
 }
 
@@ -170,6 +174,7 @@ async function initApp() {
     // Load sidebar component and data in parallel
     await Promise.all([
         loadComponent("components/sidebar.html", "sidebarContainer"),
+        loadComponent("components/operator_modal.html", "operatorModalContainer"),
         loadData("data/dados_cadop.json"),
         loadBeneficiaryData("data/dados_beneficiarios.json")
     ]);
@@ -332,8 +337,8 @@ function renderTable() {
 
     // Sort data
     filteredData.sort((a, b) => {
-        let valA = a[sortCol] || "";
-        let valB = b[sortCol] || "";
+        let valA = a[sortCol] !== undefined && a[sortCol] !== null ? a[sortCol] : "";
+        let valB = b[sortCol] !== undefined && b[sortCol] !== null ? b[sortCol] : "";
 
         if (typeof valA === 'string') valA = valA.toLowerCase();
         if (typeof valB === 'string') valB = valB.toLowerCase();
@@ -357,7 +362,7 @@ function renderTable() {
     // Render dynamic beneficiary column headers
     renderDynamicHeaders();
 
-    const totalColCount = 5 + selectedBenefColumns.length;
+    const totalColCount = 3 + selectedBenefColumns.length; // Operadora, Modalidade, Local (3) + Benef Columns
     if (pageData.length === 0) {
         tableBody.innerHTML = `
             <tr>
@@ -383,23 +388,23 @@ function renderTable() {
         const logoPath = `assets/logos/${op.Registro_ANS}.png`;
 
         const isFav = favorites.has(op.Registro_ANS);
+
+        let statusClass = op.Status_Operadora === "ATIVA" ? "ativa" : "cancelada";
         row.innerHTML = `
             <td>
                 <div class="advertiser-cell">
                     <button class="fav-star-btn ${isFav ? 'active' : ''}" data-reg="${op.Registro_ANS}" title="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="${isFav ? 'currentColor' : 'none'}">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                         </svg>
                     </button>
-                    <div class="logo-container-wrapper">
-                        <div class="advertiser-avatar color-${color}" id="avatar-${op.Registro_ANS}">
-                            ${initial}
-                        </div>
+                    <div class="advertiser-logo">
+                        <img src="${logoPath}" alt="${op.Nome_Fantasia || op.Razao_Social}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(op.Nome_Fantasia || op.Razao_Social)}&background=f74b4b&color=fff'">
                     </div>
                     <div class="advertiser-info">
                         <span class="advertiser-name clickable-name" data-index="${startIdx + index}">
                             ${op.Nome_Fantasia || op.Razao_Social}
-                            ${isAtiva ? verifiedSVG : ''}
+                            <span class="cc-badge ${statusClass}">${op.Status_Operadora}</span>
                         </span>
                         <span class="advertiser-stats">
                             ANS: ${op.Registro_ANS}
@@ -409,50 +414,24 @@ function renderTable() {
                 </div>
             </td>
             <td>
-                <span class="price-cell">${formatCNPJ(op.CNPJ)}</span>
-            </td>
-            <td>
-                <div class="review-cell">
-                    <div class="review-rate">
-                        <span class="status-badge ${isAtiva ? 'high' : 'low'}">
-                            ${op.Status_Operadora}
-                        </span>
-                    </div>
-                    <div class="review-time">
-                        ${!isAtiva && op.Data_Descredenciamento ? `Cancelada ${op.Data_Descredenciamento.substring(5, 7)}/${op.Data_Descredenciamento.substring(0, 4)}` : `Desde ${op.Data_Registro_ANS.split('-')[0]}`}
-                    </div>
+                <div class="modalidade-cell">
+                    <span class="modalidade-badge">${op.Modalidade || "N/A"}</span>
                 </div>
             </td>
             <td>
-                <span class="payment-cell">${op.Modalidade}</span>
-            </td>
-            <td>
-                <div class="limit-cell">
-                    <span class="limit-amount">${op.Cidade}</span>
-                    <span class="limit-range">${op.UF}</span>
+                <div class="location-cell">
+                    <div class="location-city">${op.Cidade || "N/A"}</div>
+                    <div class="location-uf">${op.UF || ""}</div>
                 </div>
             </td>
             ${selectedBenefColumns.map(col => `
             <td>
                 <div class="beneficiary-cell">
                     <span class="beneficiary-count">${formatNumber(op[col])}</span>
-                    <span class="beneficiary-date">Período: ${op.benef_ref_date.split('-').reverse().join('/')}</span>
+                    <span class="beneficiary-date">Período: ${op.benef_ref_date ? op.benef_ref_date.split('-').reverse().join('/') : 'N/A'}</span>
                 </div>
             </td>`).join('')}
         `;
-
-        // Attempt to load logo
-        const img = new Image();
-        img.src = logoPath;
-        img.onload = () => {
-            const avatarDiv = row.querySelector(`#avatar-${op.Registro_ANS}`);
-            if (avatarDiv) {
-                avatarDiv.classList.add("logo-loaded");
-                avatarDiv.innerHTML = `<img src="${logoPath}" alt="${op.Nome_Fantasia}" style="width:auto; height:66%; border-radius:inherit; object-fit:contain;">`;
-                avatarDiv.style.background = "rgba(255, 255, 255, 1.00)";
-                avatarDiv.style.border = "1px solid rgba(0, 0, 0, 0.05)";
-            }
-        };
 
         fragment.appendChild(row);
     });
@@ -481,451 +460,11 @@ function renderTable() {
     });
 }
 
-function formatPrice(price) {
-    if (price >= 1000) {
-        return price.toLocaleString("en-US");
-    }
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-
-
 // ---- BUY MODAL (ENRICHED) ----
-let currentModalTrader = null;
-
 function openBuyModal(index) {
     const op = currentViewData[index];
     if (!op) return;
-    currentModalTrader = op;
-
-    // Reset to Details tab
-    document.querySelectorAll(".modal-tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".modal-tab-content").forEach(t => t.classList.remove("active"));
-    document.querySelector('.modal-tab[data-tab="details"]').classList.add("active");
-    document.getElementById("tabDetails").classList.add("active");
-
-    // Initialize favorite button state
-    const favBtn = document.getElementById("favoriteBtn");
-    if (favBtn) {
-        if (favorites.has(op.Registro_ANS)) {
-            favBtn.classList.add("active");
-            favBtn.title = "Remover dos favoritos";
-        } else {
-            favBtn.classList.remove("active");
-            favBtn.title = "Adicionar aos favoritos";
-        }
-    }
-
-    // Basic info
-    const opName = op.Nome_Fantasia && op.Nome_Fantasia.trim() !== "" ? op.Nome_Fantasia : op.Razao_Social;
-    const regFormatted = op.Registro_ANS.toString().padStart(6, '0');
-    const initial = op.Nome_Fantasia ? op.Nome_Fantasia.charAt(0) : op.Razao_Social.charAt(0);
-    // Try logo in modal too
-    const logoPath = `assets/logos/${op.Registro_ANS}.png`;
-    const img = new Image();
-    const modalAvatar = document.getElementById("modalAvatar");
-    modalAvatar.className = `seller-avatar`;
-    modalAvatar.style.background = getGradient("purple");
-    modalAvatar.innerHTML = initial;
-
-    img.onload = () => {
-        modalAvatar.classList.add("logo-loaded");
-        modalAvatar.innerHTML = `<img src="${logoPath}" alt="${op.Nome_Fantasia}" style="width:auto; height:66%; border-radius:inherit; object-fit:contain;">`;
-        modalAvatar.style.background = "rgba(255, 255, 255, 1.00)";
-    };
-    img.src = logoPath;
-
-    document.getElementById("modalSellerName").textContent = opName;
-    document.getElementById("modalSellerStats").textContent = `ANS: ${regFormatted} | ${op.Status_Operadora}`;
-    document.getElementById("modalPrice").textContent = formatCNPJ(op.CNPJ);
-    document.getElementById("modalAvailable").textContent = op.Modalidade;
-    document.getElementById("modalLimit").textContent = `${op.Cidade} - ${op.UF}`;
-
-    // Website link formatting
-    const website = op.Endereco_eletronico || "";
-    const websiteEl = document.getElementById("modalPayment");
-    if (website) {
-        const fullUrl = website.startsWith("http") ? website : `http://www.${website.replace(/^www\./, "")}`;
-        const displayUrl = website.startsWith("www.") ? website : `www.${website}`;
-        websiteEl.innerHTML = `<a href="${fullUrl}" target="_blank" style="color:var(--primary); text-decoration:underline;">${displayUrl}</a>`;
-    } else {
-        websiteEl.textContent = "N/A";
-    }
-
-    const receiveCurrencyEl = document.getElementById("receiveCurrency");
-    if (receiveCurrencyEl) receiveCurrencyEl.textContent = "ANS";
-
-    // Hide or disable trading inputs (if they exist)
-    const inputGroups = document.querySelectorAll('.modal-input-group');
-    if (inputGroups[0]) inputGroups[0].style.display = "none";
-    if (inputGroups[1]) inputGroups[1].style.display = "none";
-
-    // Sparkline (Disable if exists)
-    const sparklineSection = document.querySelector('.sparkline-section');
-    if (sparklineSection) sparklineSection.style.display = "none";
-
-    // Populate Demografia tab
-    populateDemografia(op.Registro_ANS);
-
-    // Rating breakdown (Disable)
-    document.getElementById("rn518").innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">Indicadores RN518 Indisponível</div>`;
-
-    // Rating breakdown (Disable)
-    document.getElementById("cbr").innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">Indicadores CBR Indisponível</div>`;
-
-    document.getElementById("modalConfirm").textContent = `Fechar Detalhes`;
-    buyModal.classList.add("active");
-}
-
-function populateDemografia(regAns) {
-    const metricsGrid = document.getElementById("demoMetrics");
-    const chartContainer = document.getElementById("demoChartContainer");
-    const chartTitle = document.querySelector(".demo-chart-title");
-    const opData = beneficiaryData[regAns];
-
-    if (!opData || Object.keys(opData).length === 0) {
-        metricsGrid.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted); grid-column: 1/-1;">Dados demográficos indisponíveis para esta operadora.</div>`;
-        chartContainer.innerHTML = '';
-        return;
-    }
-
-    // Sort dates ascending
-    const dates = Object.keys(opData).sort();
-    const latestDate = dates[dates.length - 1];
-    const latest = opData[latestDate];
-
-    // Format reference date
-    const refMM = latestDate.substring(5, 7);
-    const refYYYY = latestDate.substring(0, 4);
-
-    // Key metrics for grid — each has a dataKey for chart selection
-    const metrics = [
-        { key: 'qt_beneficiario_ativo', label: 'Benef. Ativos', value: Number(latest.qt_beneficiario_ativo || 0).toLocaleString('pt-BR'), icon: '👥', desc: 'Quantidade de beneficiários com plano ativo na competência de referência.' },
-        { key: 'qt_beneficiario_aderido', label: 'Aderidos', value: Number(latest.qt_beneficiario_aderido || 0).toLocaleString('pt-BR'), icon: '📈', desc: 'Quantidade de novos beneficiários que aderiram a planos no período.' },
-        { key: 'qt_beneficiario_cancelado', label: 'Cancelados', value: Number(latest.qt_beneficiario_cancelado || 0).toLocaleString('pt-BR'), icon: '📉', desc: 'Quantidade de beneficiários que cancelaram seus planos no período.' },
-        { key: 'qt_beneficiario_saldo', label: 'Saldo', value: Number(latest.qt_beneficiario_saldo || 0).toLocaleString('pt-BR'), icon: '📊', desc: 'Diferença entre aderidos e cancelados no período (aderidos − cancelados).' },
-        { key: 'ativos_ate_4_anos_perc', label: '% Ativos até 4 anos', value: `${parseFloat(latest.ativos_ate_4_anos_perc || 0).toFixed(2)}%`, icon: '👶', desc: 'Percentual de beneficiários ativos com idade de 0 a 4 anos.' },
-        { key: 'ativos_ate_14_anos_perc', label: '% Ativos até 14 anos', value: `${parseFloat(latest.ativos_ate_14_anos_perc || 0).toFixed(2)}%`, icon: '🧒', desc: 'Percentual de beneficiários ativos com idade de 0 a 14 anos.' },
-        { key: 'ativos_idosos_perc', label: '% Ativos Idosos', value: `${parseFloat(latest.ativos_idosos_perc || 0).toFixed(2)}%`, icon: '👴', desc: 'Percentual de beneficiários ativos com 60 anos ou mais.' },
-        { key: 'razao_dependencia_de_idosos', label: 'Dep. Idosos', value: `${parseFloat(latest.razao_dependencia_de_idosos || 0).toFixed(2)}%`, icon: '🏥', desc: 'Razão entre a população idosa (60+) e a população em idade ativa (15–59 anos). Indica a pressão assistencial dos idosos.' },
-        { key: 'razao_dependencia_de_jovens', label: 'Dep. Jovens', value: `${parseFloat(latest.razao_dependencia_de_jovens || 0).toFixed(2)}%`, icon: '🧑', desc: 'Razão entre a população jovem (0–14 anos) e a população em idade ativa (15–59 anos).' },
-        { key: 'indice_de_envelhecimento', label: 'Índ. Envelhecimento', value: `${parseFloat(latest.indice_de_envelhecimento || 0).toFixed(2)}%`, icon: '📅', desc: 'Razão entre idosos (60+) e jovens (0–14 anos). Valores acima de 100 indicam mais idosos do que jovens na carteira.' },
-        { key: 'indice_de_longevidade', label: 'Índ. Longevidade', value: `${parseFloat(latest.indice_de_longevidade || 0).toFixed(2)}%`, icon: '⏳', desc: 'Percentual de beneficiários com 80 anos ou mais em relação ao total de idosos (60+). Indica o grau de longevidade da carteira.' },
-        { key: 'razao_sexo_terceira_idade', label: 'Sexo 3ª Idade', value: `${parseFloat(latest.razao_sexo_terceira_idade || 0).toFixed(2)}%`, icon: '⚤', desc: 'Razão entre homens e mulheres na faixa etária de 60 anos ou mais. Valores acima de 100 indicam mais mulheres idosas.' },
-        { key: 'razao_renovacao_geracional', label: 'Renov. Geracional', value: `${parseFloat(latest.razao_renovacao_geracional || 0).toFixed(2)}%`, icon: '🔄', desc: 'Razão entre beneficiários de 0–4 anos e os de 55–59 anos. Indica a capacidade de renovação etária da carteira.' },
-        { key: 'idosos_plano_individual', label: '% Idosos P. Indiv.', value: `${parseFloat(latest.idosos_plano_individual || 0).toFixed(2)}%`, icon: '🏠', desc: 'Percentual de idosos (60+) que possuem planos individuais ou familiares, em relação ao total de idosos.' },
-    ];
-
-    metricsGrid.innerHTML = `
-        <div class="demo-ref-date">Ref: ${refMM}/${refYYYY}</div>
-        ${metrics.map((m, i) => `
-            <div class="demo-metric-card${i === 0 ? ' active' : ''}" data-key="${m.key}" data-label="${m.label}" title="${m.desc}">
-                <span class="demo-metric-icon">${m.icon}</span>
-                <div class="demo-metric-info">
-                    <span class="demo-metric-value">${m.value}</span>
-                    <span class="demo-metric-label">${m.label}</span>
-                </div>
-            </div>
-        `).join('')}
-    `;
-
-    // Add click listeners to metric cards
-    const chartDesc = document.getElementById('demoChartDesc');
-    metricsGrid.querySelectorAll('.demo-metric-card').forEach(card => {
-        card.addEventListener('click', () => {
-            metricsGrid.querySelectorAll('.demo-metric-card').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-            const key = card.dataset.key;
-            const label = card.dataset.label;
-            if (chartTitle) chartTitle.textContent = `Evolução de ${label}`;
-            if (chartDesc) chartDesc.textContent = card.getAttribute('title') || '';
-            renderDemoChart(key, opData, dates, chartContainer);
-        });
-    });
-
-    // Render default chart
-    if (chartTitle) chartTitle.textContent = 'Evolução de Benef. Ativos';
-    const defaultCard = metricsGrid.querySelector('.demo-metric-card.active');
-    if (chartDesc && defaultCard) chartDesc.textContent = defaultCard.getAttribute('title') || '';
-    renderDemoChart('qt_beneficiario_ativo', opData, dates, chartContainer);
-}
-
-function renderDemoChart(dataKey, opData, dates, chartContainer) {
-    const chartData = dates.map(d => ({
-        date: d,
-        label: `${d.substring(5, 7)}/${d.substring(2, 4)}`,
-        value: Number(opData[d][dataKey] || 0)
-    }));
-
-    if (chartData.length < 2) {
-        chartContainer.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">Dados insuficientes para gráfico.</div>`;
-        return;
-    }
-
-    const W = 480, H = 180;
-    const padL = 60, padR = 16, padT = 16, padB = 36;
-    const plotW = W - padL - padR;
-    const plotH = H - padT - padB;
-
-    const values = chartData.map(d => d.value);
-    const minVal = Math.min(...values);
-    const maxVal = Math.max(...values);
-    const range = maxVal - minVal || 1;
-
-    // Generate points
-    const points = chartData.map((d, i) => {
-        const x = padL + (i / (chartData.length - 1)) * plotW;
-        const y = padT + plotH - ((d.value - minVal) / range) * plotH;
-        return { x, y, ...d };
-    });
-
-    const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-    const areaPath = `${linePath} L${points[points.length - 1].x.toFixed(1)},${padT + plotH} L${points[0].x.toFixed(1)},${padT + plotH} Z`;
-
-    // Y-axis labels (5 ticks)
-    const yTicks = 5;
-    let yLabels = '';
-    let gridLines = '';
-    for (let i = 0; i <= yTicks; i++) {
-        const val = minVal + (range * i / yTicks);
-        const y = padT + plotH - (i / yTicks) * plotH;
-        const formattedVal = val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val.toFixed(2);
-        yLabels += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" fill="var(--text-muted)" font-size="10">${formattedVal}</text>`;
-        gridLines += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="var(--border)" stroke-dasharray="3,3" opacity="0.5"/>`;
-    }
-
-    // X-axis labels (show every Nth)
-    const maxXLabels = 8;
-    const step = Math.ceil(chartData.length / maxXLabels);
-    let xLabels = '';
-    for (let i = 0; i < chartData.length; i += step) {
-        xLabels += `<text x="${points[i].x}" y="${H - 6}" text-anchor="middle" fill="var(--text-muted)" font-size="10">${points[i].label}</text>`;
-    }
-
-    // Dots + tooltips
-    const dots = points.map(p => `
-        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="var(--primary)" stroke="#fff" stroke-width="1.5"/>
-        <title>${p.label}: ${p.value.toLocaleString('pt-BR')}</title>
-    `).join('');
-
-    chartContainer.innerHTML = `
-        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%; height:auto;">
-            ${gridLines}
-            ${yLabels}
-            ${xLabels}
-            <defs>
-                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.25"/>
-                    <stop offset="100%" stop-color="var(--primary)" stop-opacity="0.02"/>
-                </linearGradient>
-            </defs>
-            <path d="${areaPath}" fill="url(#areaGrad)"/>
-            <path d="${linePath}" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            ${dots}
-        </svg>
-    `;
-}
-
-function closeBuyModal() {
-    buyModal.classList.remove("active");
-    currentModalTrader = null;
-}
-
-function getGradient(color) {
-    const gradients = {
-        purple: "linear-gradient(135deg, #7c3aed, #6d28d9)",
-        orange: "linear-gradient(135deg, #f97316, #ea580c)",
-        blue: "linear-gradient(135deg, #3b82f6, #2563eb)",
-        pink: "linear-gradient(135deg, #ec4899, #db2777)",
-        green: "linear-gradient(135deg, #10b981, #059669)",
-        red: "linear-gradient(135deg, #ef4444, #dc2626)",
-        teal: "linear-gradient(135deg, #14b8a6, #0d9488)",
-        indigo: "linear-gradient(135deg, #6366f1, #4f46e5)",
-    };
-    return gradients[color] || gradients.purple;
-}
-
-// ---- SPARKLINE ----
-function generateSparklineSVG(prices, highlightPrice) {
-    if (!prices || prices.length === 0) return "";
-
-    const width = 400;
-    const height = 50;
-    const padding = 4;
-    const sorted = [...prices].sort((a, b) => a - b);
-    const min = sorted[0];
-    const max = sorted[sorted.length - 1];
-    const range = max - min || 1;
-
-    // Create points for the sparkline
-    const points = sorted.map((p, i) => {
-        const x = padding + (i / (sorted.length - 1)) * (width - padding * 2);
-        const y = height - padding - ((p - min) / range) * (height - padding * 2);
-        return `${x},${y}`;
-    }).join(" ");
-
-    // Fill area under the line
-    const firstX = padding;
-    const lastX = padding + (width - padding * 2);
-    const fillPoints = `${firstX},${height} ${points} ${lastX},${height}`;
-
-    // Highlight dot position
-    const hlIdx = sorted.indexOf(highlightPrice);
-    const hlX = hlIdx >= 0 ? padding + (hlIdx / (sorted.length - 1)) * (width - padding * 2) : -10;
-    const hlY = hlIdx >= 0 ? height - padding - ((highlightPrice - min) / range) * (height - padding * 2) : -10;
-
-    return `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
-        <defs>
-            <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.2"/>
-                <stop offset="100%" stop-color="var(--primary)" stop-opacity="0"/>
-            </linearGradient>
-        </defs>
-        <polygon points="${fillPoints}" fill="url(#sparkGrad)"/>
-        <polyline points="${points}" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="${hlX}" cy="${hlY}" r="4" fill="var(--primary)" stroke="#fff" stroke-width="2"/>
-    </svg>`;
-}
-
-// ---- BANK BADGES ----
-function generateBankBadges(banksStr) {
-    if (!banksStr) return "";
-    const bankIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>`;
-    return banksStr.split(",").map(b =>
-        `<span class="bank-badge">${bankIcon} ${b.trim()}</span>`
-    ).join("");
-}
-
-// ---- TRADE HISTORY (Simulated) ----
-function generateTradeHistory(trader) {
-    const types = ["buy", "sell"];
-    const now = new Date();
-    let items = "";
-
-    // Generate 6 simulated trades based on trader data
-    for (let i = 0; i < 6; i++) {
-        const type = types[i % 2];
-        const daysAgo = Math.floor(Math.random() * 14) + 1;
-        const date = new Date(now - daysAgo * 86400000);
-        const dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-        const timeStr = date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-
-        // Vary the price slightly
-        const variance = (Math.random() - 0.5) * trader.price * 0.06;
-        const price = Math.round(trader.price + variance);
-
-        // Random amount
-        const amount = (Math.random() * 0.5 + 0.01).toFixed(6);
-        const value = (amount * price).toFixed(2);
-
-        const icon = type === "buy"
-            ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
-            : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="17 14 12 9 7 14"/><line x1="12" y1="9" x2="12" y2="21"/></svg>`;
-
-        items += `
-            <div class="trade-history-item">
-                <div class="trade-history-left">
-                    <div class="trade-history-icon ${type}">${icon}</div>
-                    <div class="trade-history-info">
-                        <span class="trade-history-type">${type === "buy" ? "Bought" : "Sold"} ${currentCrypto}</span>
-                        <span class="trade-history-date">${dateStr} at ${timeStr}</span>
-                    </div>
-                </div>
-                <div class="trade-history-right">
-                    <span class="trade-history-amount">${amount} ${currentCrypto}</span>
-                    <span class="trade-history-value">$${formatPrice(parseFloat(value))}</span>
-                </div>
-            </div>`;
-    }
-
-    return items;
-}
-
-// ---- RATING BREAKDOWN ----
-function generateRatingBreakdown(trader) {
-    // Calculate overall score from rate, completion, and time
-    const timeScore = Math.max(0, 100 - (trader.time / 60) * 100); // Lower time = higher score
-    const overallScore = ((trader.rate + trader.completion + timeScore) / 3).toFixed(1);
-
-    // Star calculation (out of 5)
-    const starCount = Math.round((overallScore / 100) * 5);
-    const starSVG = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
-    const emptyStarSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" width="16" height="16"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
-
-    let stars = "";
-    for (let i = 0; i < 5; i++) {
-        stars += i < starCount ? starSVG : emptyStarSVG;
-    }
-
-    function getBarClass(value) {
-        if (value >= 95) return "excellent";
-        if (value >= 85) return "good";
-        if (value >= 70) return "warning";
-        return "danger";
-    }
-
-    function getTimeLabel(min) {
-        if (min <= 10) return "Very Fast";
-        if (min <= 20) return "Fast";
-        if (min <= 45) return "Average";
-        return "Slow";
-    }
-
-    return `
-        <div class="rating-overview">
-            <span class="rating-score">${overallScore}</span>
-            <div class="rating-score-info">
-                <div class="rating-stars">${stars}</div>
-                <span class="rating-count">${trader.orders.toLocaleString()} total orders</span>
-            </div>
-        </div>
-        <div class="rating-metrics">
-            <div class="rating-metric">
-                <div class="rating-metric-header">
-                    <span class="rating-metric-label">Approval Rate</span>
-                    <span class="rating-metric-value">${trader.rate.toFixed(1)}%</span>
-                </div>
-                <div class="rating-metric-bar">
-                    <div class="rating-metric-fill ${getBarClass(trader.rate)}" style="width: ${trader.rate}%"></div>
-                </div>
-            </div>
-            <div class="rating-metric">
-                <div class="rating-metric-header">
-                    <span class="rating-metric-label">Completion Rate</span>
-                    <span class="rating-metric-value">${trader.completion.toFixed(1)}%</span>
-                </div>
-                <div class="rating-metric-bar">
-                    <div class="rating-metric-fill ${getBarClass(trader.completion)}" style="width: ${trader.completion}%"></div>
-                </div>
-            </div>
-            <div class="rating-metric">
-                <div class="rating-metric-header">
-                    <span class="rating-metric-label">Response Time</span>
-                    <span class="rating-metric-value">${trader.time} min · ${getTimeLabel(trader.time)}</span>
-                </div>
-                <div class="rating-metric-bar">
-                    <div class="rating-metric-fill ${getBarClass(timeScore)}" style="width: ${timeScore}%"></div>
-                </div>
-            </div>
-            <div class="rating-metric">
-                <div class="rating-metric-header">
-                    <span class="rating-metric-label">Trust Score</span>
-                    <span class="rating-metric-value">${trader.verified ? "✓ Verified" : "Unverified"}</span>
-                </div>
-                <div class="rating-metric-bar">
-                    <div class="rating-metric-fill ${trader.verified ? "excellent" : "warning"}" style="width: ${trader.verified ? 100 : 40}%"></div>
-                </div>
-            </div>
-        </div>`;
-}
-
-// ---- FAVORITES / WATCHLIST ----
-function getFavorites() {
-    try {
-        return JSON.parse(localStorage.getItem("finvest-favorites")) || [];
-    } catch {
-        return [];
-    }
+    openOperatorModal(op, beneficiaryData);
 }
 // ---- TOAST NOTIFICATIONS ----
 function showToast(message, type = "info") {
@@ -1200,6 +739,12 @@ function initEventListeners() {
     // Sidebar nav items
     document.querySelectorAll(".nav-item").forEach(item => {
         item.addEventListener("click", (e) => {
+            const href = item.getAttribute("href");
+            if (href && href !== "#" && !href.startsWith("./#")) {
+                // Let the browser navigate naturally
+                return;
+            }
+
             e.preventDefault();
             document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
             item.classList.add("active");
@@ -1531,49 +1076,6 @@ function exportToExcel() {
 
     showToast(`Dados exportados como Excel (.xlsx): ${fileName}`, "success");
 }
-
-function exportToCSV() {
-    const data = currentViewData;
-    if (data.length === 0) {
-        showToast("Nenhum dado para exportar", "error");
-        return;
-    }
-
-    const headers = ["Razao Social", "Nome Fantasia", "Registro ANS", "CNPJ", "Status", "Modalidade", "Cidade", "UF", "Website", "Beneficiarios Ativos"];
-    const csvRows = [headers.join(",")];
-
-    data.forEach(op => {
-        const row = [
-            `"${(op.Razao_Social || "").replace(/"/g, '""')}"`,
-            `"${(op.Nome_Fantasia || "").replace(/"/g, '""')}"`,
-            `"${op.Registro_ANS || ""}"`,
-            `"${op.CNPJ || ""}"`,
-            `"${op.Status_Operadora || ""}"`,
-            `"${op.Modalidade || ""}"`,
-            `"${op.Cidade || ""}"`,
-            `"${op.UF || ""}"`,
-            `"${op.Endereco_eletronico || ""}"`,
-            `"${op.qt_beneficiario_ativo || 0}"`
-        ];
-        csvRows.push(row.join(","));
-    });
-
-    const csvContent = "\uFEFF" + csvRows.join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    const fileName = `operadoras_${new Date().toISOString().slice(0, 10)}.csv`;
-
-    link.setAttribute("href", url);
-    link.setAttribute("download", fileName);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showToast(`Dados exportados como CSV: ${fileName}`, "success");
-}
-
 // ---- TABLE ROW ANIMATION ----
 const animStyle = document.createElement("style");
 animStyle.textContent = `
