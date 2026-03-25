@@ -393,8 +393,7 @@
                         </button>
                     </div>
 
-                    <div class="charts-grid"
-                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px;">
+                    <div class="charts-grid">
 
                         <!-- Radar Chart -->
                         <div class="chart-card radar-card"
@@ -418,6 +417,32 @@
                                 Evolução histórica de Vidas</h3>
                             <div style="position: relative; height: 320px; width: 100%;">
                                 <canvas id="barChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Doughnut Chart (Market Share) -->
+                        <div class="chart-card"
+                            style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
+                            <h3 style="font-size: 1rem; color: var(--text); margin-bottom: 20px; text-align: center;">
+                                Proporção da Carteira (Market Share)</h3>
+                            <div class="radar-content stacked">
+                                <div class="radar-canvas-wrapper" style="height: 320px;">
+                                    <canvas id="shareChart"></canvas>
+                                </div>
+                                <div id="shareTableContainer" class="radar-table-container"></div>
+                            </div>
+                        </div>
+
+                        <!-- Stacked Bar Chart (Faixa Etária) -->
+                        <div class="chart-card"
+                            style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
+                            <h3 style="font-size: 1rem; color: var(--text); margin-bottom: 20px; text-align: center;">
+                                Composição (Faixa Etária)</h3>
+                            <div class="radar-content stacked">
+                                <div class="radar-canvas-wrapper" style="height: 320px;">
+                                    <canvas id="ageChart"></canvas>
+                                </div>
+                                <div id="ageTableContainer" class="radar-table-container"></div>
                             </div>
                         </div>
 

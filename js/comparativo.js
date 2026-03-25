@@ -8,6 +8,8 @@ const STORAGE_KEY = 'finvest_compare_ops';
 // Chart instances
 let radarChartInstance = null;
 let barChartInstance = null;
+let shareChartInstance = null;
+let ageChartInstance = null;
 
 const CHART_COLORS = [
     'rgba(124, 58, 237, 1)',   // Primary Purple
@@ -459,7 +461,8 @@ function renderCharts() {
                         intersect: false,
                         callbacks: {
                             label: function (context) {
-                                return " " + context.dataset.label + ": " + context.raw.toLocaleString('pt-BR') + " vidas";
+                                const val = Number(context.raw) || 0;
+                                return " " + context.dataset.label + ": " + val.toLocaleString('pt-BR') + " vidas";
                             }
                         }
                     }
@@ -470,9 +473,15 @@ function renderCharts() {
                         grid: { color: gridColor },
                         ticks: {
                             callback: function (value) {
-                                if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
-                                if (value >= 1000) return (value / 1000).toFixed(0) + 'k';
-                                return value;
+                                if (value >= 1000000) {
+                                    let num = (value / 1000000).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+                                    return num.replace('.', ',') + 'M';
+                                }
+                                if (value >= 1000) {
+                                    let num = (value / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+                                    return num.replace('.', ',') + 'k';
+                                }
+                                return value.toLocaleString('pt-BR');
                             }
                         }
                     },
@@ -608,6 +617,190 @@ function renderCharts() {
             `;
             tableContainer.innerHTML = tableHtml;
         }
+
+        // 4. Doughnut Chart (Market Share)
+        const ctxShare = document.getElementById('shareChart').getContext('2d');
+        if (shareChartInstance) shareChartInstance.destroy();
+
+        const shareData = selectedOperators.map(op => parseFloat(op.qt_beneficiario_ativo) || 0);
+
+        shareChartInstance = new Chart(ctxShare, {
+            type: 'doughnut',
+            data: {
+                labels: operatorLabels,
+                datasets: [{
+                    data: shareData,
+                    backgroundColor: CHART_COLORS,
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: textColor, padding: 20, boxWidth: 12, usePointStyle: true }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.raw !== null) {
+                                    const total = context.chart._metasets[context.datasetIndex].total;
+                                    const percentage = total > 0 ? ((context.raw / total) * 100).toFixed(1) + '%' : '0%';
+                                    label += context.raw.toLocaleString('pt-BR') + ' vidas (' + percentage + ')';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Inject Share Table
+        const totalShare = shareData.reduce((a, b) => a + b, 0);
+        let shareTableHtml = `
+            <table class="radar-metrics-table">
+                <thead>
+                    <tr>
+                        <th style="padding-left:12px;">Operadora</th>
+                        <th>Ativos</th>
+                        <th>Proporção</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        selectedOperators.forEach((op, index) => {
+            const val = shareData[index];
+            const perc = totalShare > 0 ? ((val / totalShare) * 100).toFixed(1) + '%' : '0%';
+            shareTableHtml += `
+                <tr>
+                    <td>
+                        <div class="metric-label" style="display:flex; align-items:center; gap:6px; background:transparent; padding:0;">
+                            <span style="display:inline-block; width:10px; height:10px; background:${CHART_COLORS[index]}; border-radius:50%; flex-shrink:0;"></span>
+                            <span style="max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${operatorLabels[index]}">${operatorLabels[index]}</span>
+                        </div>
+                    </td>
+                    <td>${val.toLocaleString('pt-BR')}</td>
+                    <td><strong style="color:var(--text);">${perc}</strong></td>
+                </tr>
+            `;
+        });
+        shareTableHtml += `</tbody></table>`;
+        const shareContainer = document.getElementById('shareTableContainer');
+        if (shareContainer) shareContainer.innerHTML = shareTableHtml;
+
+        // 5. Stacked Bar Chart (Age Composition)
+        const ctxAge = document.getElementById('ageChart').getContext('2d');
+        if (ageChartInstance) ageChartInstance.destroy();
+
+        const dataJovens = selectedOperators.map(op => parseFloat(op.ativos_ate_14_anos_perc) || 0);
+        const dataIdosos = selectedOperators.map(op => parseFloat(op.ativos_idosos_perc) || 0);
+        const dataAdultos = selectedOperators.map((op, i) => {
+            let totalJovensIdosos = dataJovens[i] + dataIdosos[i];
+            let adultos = 100 - totalJovensIdosos;
+            return adultos > 0 ? adultos : 0;
+        });
+
+        ageChartInstance = new Chart(ctxAge, {
+            type: 'bar',
+            data: {
+                labels: operatorLabels,
+                datasets: [
+                    {
+                        label: '0 a 14 Anos',
+                        data: dataJovens,
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)', // Blue
+                    },
+                    {
+                        label: '15 a 59 Anos',
+                        data: dataAdultos,
+                        backgroundColor: 'rgba(16, 185, 129, 0.8)', // Green
+                    },
+                    {
+                        label: '60+ Anos',
+                        data: dataIdosos,
+                        backgroundColor: 'rgba(124, 58, 237, 0.8)', // Purple
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // Horizontal bars
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { color: gridColor },
+                        ticks: {
+                            color: textColor,
+                            callback: function(value) { return value + '%'; }
+                        },
+                        max: 100
+                    },
+                    y: {
+                        stacked: true,
+                        grid: { display: false },
+                        ticks: { color: textColor }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: textColor, boxWidth: 12, usePointStyle: true }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Inject Age Table
+        let ageTableHtml = `
+            <table class="radar-metrics-table">
+                <thead>
+                    <tr>
+                        <th style="padding-left:12px;">Operadora</th>
+                        <th style="color:rgba(59, 130, 246, 1);">0-14</th>
+                        <th style="color:rgba(16, 185, 129, 1);">15-59</th>
+                        <th style="color:rgba(124, 58, 237, 1);">60+</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        selectedOperators.forEach((op, index) => {
+            const j = dataJovens[index];
+            const a = dataAdultos[index];
+            const i = dataIdosos[index];
+            ageTableHtml += `
+                <tr>
+                    <td>
+                        <div class="metric-label" style="display:flex; align-items:center; gap:6px; background:transparent; padding:0;">
+                            <span style="display:inline-block; width:10px; height:10px; background:${CHART_COLORS[index]}; border-radius:50%; flex-shrink:0;"></span>
+                            <span style="max-width:100px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${operatorLabels[index]}">${operatorLabels[index]}</span>
+                        </div>
+                    </td>
+                    <td>${j.toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1})}%</td>
+                    <td>${a.toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1})}%</td>
+                    <td><strong style="color:var(--text);">${i.toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1})}%</strong></td>
+                </tr>
+            `;
+        });
+        ageTableHtml += `</tbody></table>`;
+        const ageContainer = document.getElementById('ageTableContainer');
+        if (ageContainer) ageContainer.innerHTML = ageTableHtml;
     }
 }
 

@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    // Logica do FAQ
+    // Lógica do FAQ
     document.querySelectorAll(".faq-item").forEach(item => {
         const questionBtn = item.querySelector(".faq-question");
         questionBtn.addEventListener("click", () => {
@@ -99,4 +99,22 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     });
+
+    // Lógica de busca no FAQ
+    const faqSearchInput = document.getElementById("faqSearchInput");
+    if (faqSearchInput) {
+        faqSearchInput.addEventListener("input", (e) => {
+            const searchTerm = e.target.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            
+            document.querySelectorAll(".faq-item").forEach(item => {
+                const text = item.textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                
+                if (text.includes(searchTerm)) {
+                    item.style.display = "";
+                } else {
+                    item.style.display = "none";
+                }
+            });
+        });
+    }
 });

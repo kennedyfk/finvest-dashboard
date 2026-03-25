@@ -203,6 +203,11 @@
             color: #8b5cf6;
         }
 
+        .support-icon.linkedin {
+            background: rgba(10, 102, 194, 0.1);
+            color: #0a66c2;
+        }
+
         .support-info {
             display: flex;
             flex-direction: column;
@@ -278,7 +283,7 @@
                             <circle cx="11" cy="11" r="8" />
                             <line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg>
-                        <input type="text" placeholder="Pesquise por artigos, tutoriais ou palavras-chave...">
+                        <input type="text" id="faqSearchInput" placeholder="Pesquise por artigos, tutoriais ou palavras-chave...">
                     </div>
                 </div>
 
@@ -308,35 +313,57 @@
                             </div>
                             <div class="faq-item">
                                 <button class="faq-question">
-                                    <span>O que significa "Status da Operadora"?</span>
+                                    <span>Como funciona a ferramenta de Comparativo (Benchmarking)?</span>
                                     <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                                         <polyline points="6 9 12 15 18 9" />
                                     </svg>
                                 </button>
                                 <div class="faq-answer">
-                                    O status indica a situação cadastral da operadora perante a agência reguladora, variando entre ATIVA (operando normalmente), CANCELADA, ou SUSPENSA. Somente operadoras ativas constam preferencialmente nas extrações primárias, a menos que o filtro Avançado esteja aplicado.
+                                    Acesse a aba "Comparativo" na barra lateral para analisar até 4 operadoras simultaneamente. Você pode adicionar as operadoras pela barra de pesquisa e visualizar gráficos evolutivos, como a linha do tempo de Beneficiários Ativos, além de analisar perfis demográficos de forma sobreposta.
                                 </div>
                             </div>
                             <div class="faq-item">
                                 <button class="faq-question">
-                                    <span>E possível exportar dados filtrados para Excel?</span>
+                                    <span>O que o gráfico de "Raio-X: Perfil Demográfico" analisa?</span>
                                     <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                                         <polyline points="6 9 12 15 18 9" />
                                     </svg>
                                 </button>
                                 <div class="faq-answer">
-                                    Sim! Utilize o botão "Export" na barra de ações principal. Você poderá obter as planilhas CSV com formatação brasileira (separado por vírgula ou ponto-e-vírgula dependendo do Excel) listando exatamente o subconjunto de operadoras visíveis naquele momento.
+                                    Localizado na página de Comparativo, o Raio-X exibe um Gráfico Radar normalizado acompanhado de uma tabela de indicadores pontuais. Ele permite cruzar dados como a % de Idosos, Índice de Envelhecimento e Razão de Dependência, oferecendo uma análise visual e numérica lado a lado das operadoras.
                                 </div>
                             </div>
                             <div class="faq-item">
                                 <button class="faq-question">
-                                    <span>Como personalizar o meu Dashboard (Colunas)?</span>
+                                    <span>Como salvo operadoras favoritas?</span>
                                     <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                                         <polyline points="6 9 12 15 18 9" />
                                     </svg>
                                 </button>
                                 <div class="faq-answer">
-                                    O botão "Colunas" acima da tabela de Operadoras permite adicionar indicadores demográficos específicos ao lado do painel de contagem total (idade, pirâmides, dependências). O Dashboard salvará o estado e as visualizações.
+                                    Sempre que visualizar uma operadora na tabela principal ou abrir seu modal de detalhes, você pode clicar no ícone de "Estrela" para favoritá-la. As operadoras favoritas ficam rapidamente acessíveis no topo do Painel Geral para monitoramento contínuo.
+                                </div>
+                            </div>
+                            <div class="faq-item">
+                                <button class="faq-question">
+                                    <span>Posso recolher o Menu Lateral (Sidebar) para ganhar espaço?</span>
+                                    <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                        <polyline points="6 9 12 15 18 9" />
+                                    </svg>
+                                </button>
+                                <div class="faq-answer">
+                                    Sim! Basta clicar no ícone/logo no topo esquerdo do menu de navegação. A barra lateral será encolhida exibindo apenas os ícones, maximizando o espaço útil na tela para as visualizações de dados e gráficos. A plataforma até memorizará a sua preferência!
+                                </div>
+                            </div>
+                            <div class="faq-item">
+                                <button class="faq-question">
+                                    <span>É possível exportar dados filtrados para Excel?</span>
+                                    <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                        <polyline points="6 9 12 15 18 9" />
+                                    </svg>
+                                </button>
+                                <div class="faq-answer">
+                                    Sim. Você pode exportar as métricas através do botão de "Exportar" na barra superior do Painel Geral. A exportação extrairá os registros visíveis (após aplicar os seus filtros de porte, tipo, UF, etc) no formato CSV otimizado para softwares como Excel e Google Sheets.
                                 </div>
                             </div>
                         </div>
@@ -377,6 +404,17 @@
                             <div class="support-info">
                                 <span class="support-title">Documentação API</span>
                                 <span class="support-desc">Guias completos de integração e dicionários de dados da ANS.</span>
+                            </div>
+                        </a>
+                        <a href="https://www.linkedin.com/in/seu_perfil" target="_blank" rel="noopener noreferrer" class="support-card">
+                            <div class="support-icon linkedin">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                                </svg>
+                            </div>
+                            <div class="support-info">
+                                <span class="support-title">Conecte-se no LinkedIn</span>
+                                <span class="support-desc">Acompanhe nossas atualizações, dicas de uso e novidades na nossa rede.</span>
                             </div>
                         </a>
                     </div>
