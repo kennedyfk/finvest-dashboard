@@ -2,17 +2,18 @@ import http.server
 import socketserver
 import os
 import sys
+from typing import Any, Tuple
 
-PORT = 8123
-DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+PORT: int = 8123
+DIRECTORY: str = os.path.dirname(os.path.abspath(__file__))
 
 class Handler(http.server.SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
-    def log_message(self, format, *args):
+    def log_message(self, format: str, *args: Any) -> None:
         # Log to both stdout and stderr for visibility in command_status/read_terminal
-        message = "%s - - [%s] %s\n" % (self.address_string(), self.log_date_time_string(), format%args)
+        message: str = "%s - - [%s] %s\n" % (self.address_string(), self.log_date_time_string(), format % args)
         sys.stderr.write(message)
         sys.stdout.write(message)
         sys.stdout.flush()

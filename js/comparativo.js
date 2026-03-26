@@ -1,7 +1,11 @@
+import { store } from './services/store.js';
+import { initSidebar } from './sidebar.js';
+import { openOperatorModal } from './components/operator_modal.js';
+import { loadComponent, showToast, formatNumber, formatPercent } from './utils/ui.js';
+
 let allOperatorsArray = [];
 let selectedOperators = [];
 let globalBenefData = {};
-let favorites = new Set(JSON.parse(localStorage.getItem('finvest_favorites') || '[]').filter(x => x !== null && x !== undefined));
 const MAX_COMPARE = 4;
 const STORAGE_KEY = 'finvest_compare_ops';
 
@@ -27,19 +31,7 @@ const CHART_BG_COLORS = [
 // Globals ref dates
 let globalBenefRefDate = "";
 
-async function loadComponent(url, targetId) {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Failed to load ${url}`);
-        const html = await response.text();
-        const container = document.getElementById(targetId);
-        if (container) {
-            container.outerHTML = html;
-        }
-    } catch (err) {
-        console.warn(`Component load failed for ${url}:`, err.message);
-    }
-}
+// loadComponent now imported from utils/ui.js
 
 function initTheme() {
     const saved = localStorage.getItem("finvest-theme");
@@ -70,23 +62,7 @@ function updateThemeIcons() {
     }
 }
 
-function showToast(message, type = "info") {
-    const toastContainer = document.getElementById("toastContainer");
-    const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-
-    let icon = `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
-    if (type === "success") icon = `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
-    else if (type === "error" || type === "warning") icon = `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
-
-    toast.innerHTML = `${icon}<span class="toast-message">${message}</span>`;
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.animation = "toastOut 0.3s ease forwards";
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
+// showToast now imported from utils/ui.js
 
 // Data loading
 async function loadData() {
@@ -156,21 +132,10 @@ function loadCompareData() {
 }
 
 function toggleFavorite(regAns) {
-    if (!regAns) return;
-    if (favorites.has(regAns)) favorites.delete(regAns);
-    else favorites.add(regAns);
-    localStorage.setItem('finvest_favorites', JSON.stringify([...favorites]));
+    store.toggleFavorite(regAns);
 }
 
-function formatNumber(num) {
-    if (num === undefined || num === null || isNaN(num)) return "—";
-    return num.toLocaleString('pt-BR');
-}
-
-function formatPercent(num) {
-    if (num === undefined || num === null || isNaN(num)) return "—";
-    return num.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
-}
+// formatNumber/formatPercent now imported from utils/ui.js
 
 function renderCards() {
     const grid = document.getElementById("compareGrid");
@@ -427,7 +392,7 @@ function renderCharts() {
         const datasets = selectedOperators.map((op, idx) => {
             const name = operatorLabels[idx];
             const history = globalBenefData[op.Registro_ANS] || {};
-            
+
             return {
                 label: name,
                 data: sortedDates.map(d => history[d] ? history[d].qt_beneficiario_ativo || 0 : null),
@@ -451,7 +416,7 @@ function renderCharts() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { 
+                    legend: {
                         display: true,
                         position: 'top',
                         labels: { boxWidth: 12, usePointStyle: true, font: { size: 10 } }
@@ -556,7 +521,7 @@ function renderCharts() {
                             const raw = ds.rawData[context.dataIndex];
                             let formatted = raw;
                             if (metric.label.includes('%')) formatted = formatPercent(raw);
-                            else if (metric.key.startsWith('razao_') || metric.key.startsWith('indice_')) 
+                            else if (metric.key.startsWith('razao_') || metric.key.startsWith('indice_'))
                                 formatted = raw.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                             else formatted = formatNumber(raw);
                             return `${ds.label}: ${formatted}`;
@@ -575,47 +540,47 @@ function renderCharts() {
             options: radarOptions
         });
 
-        // 3. Radar Metrics Table
+        // 3. Radar Metrics Grid (Modern rewrite)
         const tableContainer = document.getElementById('radarTableContainer');
         if (tableContainer) {
-            let tableHtml = `
-                <table class="radar-metrics-table">
-                    <thead>
-                        <tr>
-                            <th>Indicador</th>
-                            ${selectedOperators.map((op, idx) => `
-                                <th style="color: ${CHART_COLORS[idx % CHART_COLORS.length]}">
-                                    ${operatorLabels[idx]}
-                                </th>
-                            `).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>
+            let gridHtml = `
+                <div class="benchmark-grid">
+                    <div class="benchmark-header">
+                        <div class="benchmark-cell label-cell header-cell">
+                            <div class="cell-content">Indicador</div>
+                            <div class="operator-bar" style="background: var(--border);"></div>
+                        </div>
+                        ${selectedOperators.map((op, idx) => `
+                            <div class="benchmark-cell header-cell">
+                                <div class="cell-content" title="${operatorLabels[idx]}">${operatorLabels[idx]}</div>
+                                <div class="operator-bar" style="background: ${CHART_COLORS[idx % CHART_COLORS.length]};"></div>
+                            </div>
+                        `).join('')}
+                    </div>
             `;
 
             radarMetrics.forEach(m => {
-                tableHtml += `
-                    <tr>
-                        <td class="metric-label">${m.label}</td>
+                gridHtml += `
+                    <div class="benchmark-row">
+                        <div class="benchmark-cell label-cell">${m.label}</div>
                         ${selectedOperators.map(op => {
-                            const val = op[m.key] || 0;
-                            let formatted = "";
-                            if (m.label.includes('%')) formatted = formatPercent(val);
-                            else if (m.key.startsWith('razao_') || m.key.startsWith('indice_')) 
-                                formatted = val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                            else formatted = formatNumber(val);
-                            
-                            return `<td>${formatted}</td>`;
-                        }).join('')}
-                    </tr>
+                    const val = op[m.key] || 0;
+                    let formatted = "";
+                    if (m.label.includes('%')) {
+                        formatted = val.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+                    } else if (m.key.startsWith('razao_') || m.key.startsWith('indice_') || m.key.startsWith('ind_')) {
+                        formatted = val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    } else {
+                        formatted = val.toLocaleString('pt-BR');
+                    }
+                    return `<div class="benchmark-cell">${formatted}</div>`;
+                }).join('')}
+                    </div>
                 `;
             });
 
-            tableHtml += `
-                    </tbody>
-                </table>
-            `;
-            tableContainer.innerHTML = tableHtml;
+            gridHtml += `</div>`;
+            tableContainer.innerHTML = gridHtml;
         }
 
         // 4. Doughnut Chart (Market Share)
@@ -683,9 +648,9 @@ function renderCharts() {
             shareTableHtml += `
                 <tr>
                     <td>
-                        <div class="metric-label" style="display:flex; align-items:center; gap:6px; background:transparent; padding:0;">
+                        <div class="metric-label" style="display:flex; align-items:center; gap:8px; background:transparent; padding:0;">
                             <span style="display:inline-block; width:10px; height:10px; background:${CHART_COLORS[index]}; border-radius:50%; flex-shrink:0;"></span>
-                            <span style="max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${operatorLabels[index]}">${operatorLabels[index]}</span>
+                            <span style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;" title="${operatorLabels[index]}">${operatorLabels[index]}</span>
                         </div>
                     </td>
                     <td>${val.toLocaleString('pt-BR')}</td>
@@ -741,7 +706,7 @@ function renderCharts() {
                         grid: { color: gridColor },
                         ticks: {
                             color: textColor,
-                            callback: function(value) { return value + '%'; }
+                            callback: function (value) { return value + '%'; }
                         },
                         max: 100
                     },
@@ -758,7 +723,7 @@ function renderCharts() {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 return context.dataset.label + ': ' + context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
                             }
                         }
@@ -787,14 +752,14 @@ function renderCharts() {
             ageTableHtml += `
                 <tr>
                     <td>
-                        <div class="metric-label" style="display:flex; align-items:center; gap:6px; background:transparent; padding:0;">
+                        <div class="metric-label" style="display:flex; align-items:center; gap:8px; background:transparent; padding:0;">
                             <span style="display:inline-block; width:10px; height:10px; background:${CHART_COLORS[index]}; border-radius:50%; flex-shrink:0;"></span>
-                            <span style="max-width:100px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${operatorLabels[index]}">${operatorLabels[index]}</span>
+                            <span style="max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;" title="${operatorLabels[index]}">${operatorLabels[index]}</span>
                         </div>
                     </td>
-                    <td>${j.toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1})}%</td>
-                    <td>${a.toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1})}%</td>
-                    <td><strong style="color:var(--text);">${i.toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1})}%</strong></td>
+                    <td>${j.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%</td>
+                    <td>${a.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%</td>
+                    <td><strong style="color:var(--text);">${i.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%</strong></td>
                 </tr>
             `;
         });
@@ -884,61 +849,15 @@ function initSearch() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     initTheme();
-    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
-    document.getElementById("compareInput").addEventListener("focus", () => {
-        document.getElementById("compareDropdown").classList.add("active");
-    });
 
-    const clearAllBtn = document.getElementById("clearAllBtn");
-    if (clearAllBtn) {
-        clearAllBtn.addEventListener("click", () => {
-            if (selectedOperators.length > 0) {
-                if (confirm("Deseja remover todas as operadoras selecionadas?")) {
-                    selectedOperators = [];
-                    saveCompareData();
-                    renderCards();
-                }
-            }
-        });
-    }
-
-    // Load navbar and modal
+    // Load components first
     await Promise.all([
         loadComponent("components/sidebar.html", "sidebarContainer"),
         loadComponent("components/operator_modal.html", "operatorModalContainer")
     ]);
 
-    // Sidebar logic
-    const sidebar = document.getElementById("sidebar");
-    const sidebarToggle = document.getElementById("sidebarToggle");
-
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener("click", () => {
-            sidebar.classList.toggle("open");
-        });
-        document.addEventListener("click", (e) => {
-            if (window.innerWidth <= 1024 && sidebar.classList.contains("open")) {
-                if (!sidebar.contains(e.target) && e.target !== sidebarToggle && !sidebarToggle.contains(e.target)) {
-                    sidebar.classList.remove("open");
-                }
-            }
-        });
-    }
-
-    document.querySelectorAll(".nav-item").forEach(item => {
-        if (item.dataset.page === "compare") {
-            document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-            item.classList.add("active");
-        }
-
-        const href = item.getAttribute("href");
-        if (href === "#") {
-            item.addEventListener("click", (e) => {
-                e.preventDefault();
-                showToast("Em breve!", "info");
-            });
-        }
-    });
+    // Sidebar logic handled by initSidebar
+    initSidebar();
 
     await loadData();
     initSearch();

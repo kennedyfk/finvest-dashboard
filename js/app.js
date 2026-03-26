@@ -1,7 +1,7 @@
-// ===========================
-// Finvest P2P Trading Dashboard
-// Application Logic
-// ===========================
+import { store } from './services/store.js';
+import { initSidebar } from './sidebar.js';
+import { openOperatorModal } from './components/operator_modal.js';
+import { loadComponent, showToast, formatNumber, formatPercent } from './utils/ui.js';
 
 // ---- STATE ----
 let operatorsData = {};
@@ -18,25 +18,13 @@ let sortCol = "qt_beneficiario_ativo";
 let sortAsc = false;
 let currentViewData = [];
 let selectedBenefColumns = ['qt_beneficiario_ativo'];
-let favorites = new Set(JSON.parse(localStorage.getItem('finvest_favorites') || '[]').filter(x => x !== null && x !== undefined));
 let showFavoritesOnly = false;
 
-function saveFavorites() {
-    localStorage.setItem('finvest_favorites', JSON.stringify([...favorites]));
-}
-function toggleFavorite(regAns) {
-    if (!regAns) return;
-    if (favorites.has(regAns)) favorites.delete(regAns);
-    else favorites.add(regAns);
-    saveFavorites();
-    renderTable();
-    updateFavBtnState();
-}
 function updateFavBtnState() {
     const btn = document.getElementById('favFilterBtn');
     if (!btn) return;
     btn.classList.toggle('active', showFavoritesOnly);
-    const count = favorites.size;
+    const count = store.favorites.size;
     btn.querySelector('.fav-count').textContent = count > 0 ? `(${count})` : '';
 }
 
@@ -48,18 +36,7 @@ function formatCNPJ(cnpj) {
     return clean.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
 }
 
-function formatNumber(num) {
-    if (num === null || num === undefined || num === '' || isNaN(num)) return '—';
-    return Number(num).toLocaleString('pt-BR');
-}
-
-function formatPrice(price) {
-    if (price >= 1000) {
-        return price.toLocaleString("en-US");
-    }
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
+// UI Helpers now imported from utils/ui.js
 function findGlobalMaxDate() {
     let maxDate = '';
     Object.values(beneficiaryData).forEach(opDates => {
@@ -91,16 +68,7 @@ const BENEF_COLUMN_LABELS = {
     idosos_plano_individual: '% Idosos P.I.'
 };
 
-async function loadComponent(url, targetId) {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Failed to load ${url}`);
-        const html = await response.text();
-        document.getElementById(targetId).outerHTML = html;
-    } catch (err) {
-        console.warn(`Component load failed for ${url}:`, err.message);
-    }
-}
+// loadComponent now imported from utils/ui.js
 
 // ---- DATA LOADERS ----
 async function loadData(url) {
@@ -171,10 +139,17 @@ async function initApp() {
     // Apply saved theme immediately
     initTheme();
 
-    // Load sidebar component and data in parallel
+    // Load components first
     await Promise.all([
         loadComponent("components/sidebar.html", "sidebarContainer"),
-        loadComponent("components/operator_modal.html", "operatorModalContainer"),
+        loadComponent("components/operator_modal.html", "operatorModalContainer")
+    ]);
+
+    // Initialize Sidebar logic
+    initSidebar();
+
+    // Load data in parallel
+    await Promise.all([
         loadData("data/dados_cadop.json"),
         loadBeneficiaryData("data/dados_beneficiarios.json")
     ]);
@@ -318,7 +293,7 @@ function renderTable() {
 
     // 3b. Favorites filter
     if (showFavoritesOnly) {
-        filteredData = filteredData.filter(op => favorites.has(op.Registro_ANS));
+        filteredData = filteredData.filter(op => store.favorites.has(op.Registro_ANS.toString()));
     }
 
     // 4. Global Search
@@ -387,7 +362,7 @@ function renderTable() {
         const color = ["purple", "indigo", "blue", "pink", "green", "orange", "red", "teal"][index % 8];
         const logoPath = `assets/logos/${op.Registro_ANS}.png`;
 
-        const isFav = favorites.has(op.Registro_ANS);
+        const isFav = store.favorites.has(op.Registro_ANS.toString());
 
         let statusClass = op.Status_Operadora === "ATIVA" ? "ativa" : "cancelada";
         row.innerHTML = `
@@ -455,7 +430,9 @@ function renderTable() {
     document.querySelectorAll(".fav-star-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
-            toggleFavorite(btn.dataset.reg);
+            store.toggleFavorite(btn.dataset.reg);
+            renderTable();
+            updateFavBtnState();
         });
     });
 }
@@ -465,28 +442,6 @@ function openBuyModal(index) {
     const op = currentViewData[index];
     if (!op) return;
     openOperatorModal(op, beneficiaryData);
-}
-// ---- TOAST NOTIFICATIONS ----
-function showToast(message, type = "info") {
-    const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-
-    let iconSVG = "";
-    if (type === "success") {
-        iconSVG = `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 12 15 16 9"/></svg>`;
-    } else if (type === "error") {
-        iconSVG = `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
-    } else {
-        iconSVG = `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="#f74b4b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
-    }
-
-    toast.innerHTML = `${iconSVG}<span class="toast-message">${message}</span>`;
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.animation = "toastOut 0.3s ease forwards";
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
 }
 
 // ---- EVENT LISTENERS ----
@@ -570,10 +525,9 @@ function initEventListeners() {
 
     if (favClearBtn) {
         favClearBtn.addEventListener('click', () => {
-            if (favorites.size === 0) return;
+            if (store.favorites.size === 0) return;
             if (confirm("Tem certeza que deseja limpar todos os favoritos?")) {
-                favorites.clear();
-                saveFavorites();
+                store.clearFavorites();
                 showFavoritesOnly = false;
                 currentPage = 1;
                 renderTable();
@@ -788,18 +742,20 @@ function initEventListeners() {
     // Favorite Button
     document.getElementById("favoriteBtn").addEventListener("click", () => {
         if (!currentModalTrader) return;
-        toggleFavorite(currentModalTrader.Registro_ANS);
+        const isFav = store.toggleFavorite(currentModalTrader.Registro_ANS);
         const favBtn = document.getElementById("favoriteBtn");
-        const isFav = favorites.has(currentModalTrader.Registro_ANS);
+        favBtn.classList.toggle("active", isFav);
+        favBtn.title = isFav ? "Remover dos favoritos" : "Adicionar aos favoritos";
+        
         if (isFav) {
-            favBtn.classList.add("active");
-            favBtn.title = "Remover dos favoritos";
             showToast(`${currentModalTrader.Nome_Fantasia || currentModalTrader.Razao_Social} adicionado aos favoritos ★`, "success");
         } else {
-            favBtn.classList.remove("active");
-            favBtn.title = "Adicionar aos favoritos";
             showToast(`${currentModalTrader.Nome_Fantasia || currentModalTrader.Razao_Social} removido dos favoritos`, "info");
         }
+        
+        // Refresh table to reflect favorite change in background
+        renderTable();
+        updateFavBtnState();
     });
 
     // Search

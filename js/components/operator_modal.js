@@ -1,7 +1,4 @@
-/**
- * js/components/operator_modal.js
- * Lógica modularizada para o Modal de Detalhes da Operadora.
- */
+import { store } from '../services/store.js';
 
 let currentModalTrader = null;
 let currentModalBenefData = null;
@@ -108,12 +105,10 @@ function populateDemografia(regAns) {
         return;
     }
 
-    // Sort dates ascending
     const dates = Object.keys(opData).sort();
     const latestDate = dates[dates.length - 1];
     const latest = opData[latestDate];
 
-    // Format reference date
     const refMM = latestDate.substring(5, 7);
     const refYYYY = latestDate.substring(0, 4);
 
@@ -159,7 +154,6 @@ function populateDemografia(regAns) {
             });
         });
 
-        // Initialize first chart dynamically
         const firstCard = metricsGrid.querySelector('.demo-metric-card');
         if (firstCard && chartDesc) {
             chartDesc.textContent = firstCard.getAttribute('title') || '';
@@ -170,17 +164,13 @@ function populateDemografia(regAns) {
     renderDemoChart('qt_beneficiario_ativo', opData, dates, chartContainer);
 }
 
-function openOperatorModal(op, benefDataDict) {
+export function openOperatorModal(op, benefDataDict) {
     const buyModal = document.getElementById("buyModal");
-    if (!buyModal) {
-        console.error("Modal container not found!");
-        return;
-    }
+    if (!buyModal) return;
 
     currentModalTrader = op;
     currentModalBenefData = benefDataDict;
 
-    // Reset to Details tab
     document.querySelectorAll(".modal-tab").forEach(t => t.classList.remove("active"));
     document.querySelectorAll(".modal-tab-content").forEach(t => t.classList.remove("active"));
     const firstTabBtn = document.querySelector('.modal-tab[data-tab="details"]');
@@ -188,34 +178,20 @@ function openOperatorModal(op, benefDataDict) {
     if (firstTabBtn) firstTabBtn.classList.add("active");
     if (firstTabCont) firstTabCont.classList.add("active");
 
-    // Initialize favorite button state
     const favBtn = document.getElementById("favoriteBtn");
     if (favBtn) {
-        if (typeof favorites !== 'undefined' && favorites.has(op.Registro_ANS)) {
-            favBtn.classList.add("active");
-            favBtn.title = "Remover dos favoritos";
-        } else {
-            favBtn.classList.remove("active");
-            favBtn.title = "Adicionar aos favoritos";
-        }
+        favBtn.classList.toggle("active", store.favorites.has(op.Registro_ANS.toString()));
+        favBtn.title = store.favorites.has(op.Registro_ANS.toString()) ? "Remover dos favoritos" : "Adicionar aos favoritos";
 
         const newFavBtn = favBtn.cloneNode(true);
         favBtn.parentNode.replaceChild(newFavBtn, favBtn);
         newFavBtn.addEventListener("click", () => {
-            if (typeof toggleFavorite === 'function') {
-                toggleFavorite(op.Registro_ANS);
-                if (favorites.has(op.Registro_ANS)) {
-                    newFavBtn.classList.add("active");
-                    newFavBtn.title = "Remover dos favoritos";
-                } else {
-                    newFavBtn.classList.remove("active");
-                    newFavBtn.title = "Adicionar aos favoritos";
-                }
-            }
+            const isFav = store.toggleFavorite(op.Registro_ANS);
+            newFavBtn.classList.toggle("active", isFav);
+            newFavBtn.title = isFav ? "Remover dos favoritos" : "Adicionar aos favoritos";
         });
     }
 
-    // Basic info
     const opName = op.Nome_Fantasia && op.Nome_Fantasia.trim() !== "" ? op.Nome_Fantasia : op.Razao_Social;
     const regFormatted = op.Registro_ANS.toString().padStart(6, '0');
     const initial = op.Nome_Fantasia ? op.Nome_Fantasia.charAt(0) : op.Razao_Social.charAt(0);
@@ -240,7 +216,6 @@ function openOperatorModal(op, benefDataDict) {
     document.getElementById("modalAvailable").textContent = op.Modalidade;
     document.getElementById("modalLimit").textContent = `${op.Cidade} - ${op.UF}`;
 
-    // Website link formatting
     const website = op.Endereco_eletronico || "";
     const websiteEl = document.getElementById("modalPayment");
     if (websiteEl) {
@@ -257,13 +232,10 @@ function openOperatorModal(op, benefDataDict) {
 
     document.getElementById("rn518").innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">Indicadores RN518 Indisponível</div>`;
     document.getElementById("cbr").innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">Indicadores CBR Indisponível</div>`;
-
     document.getElementById("modalConfirm").textContent = `Fechar Detalhes`;
 
-    // Open modal
     buyModal.classList.add("active");
 
-    // Close buttons setup
     const modalClose = document.getElementById("modalClose");
     const modalConfirm = document.getElementById("modalConfirm");
     const hideModal = () => buyModal.classList.remove("active");
@@ -271,7 +243,6 @@ function openOperatorModal(op, benefDataDict) {
     if (modalConfirm) modalConfirm.onclick = hideModal;
     buyModal.onclick = (e) => { if (e.target === buyModal) hideModal(); }
 
-    // Tab wiring
     document.querySelectorAll(".modal-tab").forEach(tab => {
         tab.onclick = () => {
             document.querySelectorAll(".modal-tab").forEach(t => t.classList.remove("active"));
@@ -281,3 +252,4 @@ function openOperatorModal(op, benefDataDict) {
         }
     });
 }
+
