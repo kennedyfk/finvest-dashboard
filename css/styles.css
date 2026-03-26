@@ -78,6 +78,15 @@
     --radius-xs: 6px;
     --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --sidebar-width: 240px;
+
+    /* Skeleton Tokens */
+    --skeleton-bg: #e2e8f0;
+    --skeleton-shimmer: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
 }
 
 /* Dark Theme Tokens Overrides */
@@ -95,6 +104,15 @@
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+
+    /* Skeleton Tokens Dark */
+    --skeleton-bg: #2d3748;
+    --skeleton-shimmer: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
 }
 
 [data-theme="dark"] .sidebar {
@@ -1960,11 +1978,6 @@ body {
     background: rgba(124, 58, 237, 0.08);
 }
 
-.demo-metric-icon {
-    font-size: 1.2rem;
-    flex-shrink: 0;
-}
-
 .demo-metric-info {
     display: flex;
     flex-direction: column;
@@ -2568,6 +2581,53 @@ body {
     flex-shrink: 0;
 }
 
+/* ---- Filter Search ---- */
+.filter-search-container {
+    padding: 8px 12px;
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+    z-index: 10;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 4px;
+}
+
+.filter-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.filter-search-icon {
+    position: absolute;
+    left: 10px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.filter-search-input {
+    width: 100%;
+    padding: 8px 12px 8px 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 0.81rem;
+    background: var(--bg);
+    color: var(--text);
+    transition: all var(--transition);
+}
+
+.filter-search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+    background: var(--card-bg);
+}
+
+/* Hide non-matching items */
+.filter-checkbox-item.hidden {
+    display: none;
+}
+
 .toast-message {
     font-size: 0.81rem;
     color: var(--text);
@@ -3086,6 +3146,53 @@ body {
     flex-shrink: 0;
 }
 
+/* ---- Filter Search ---- */
+.filter-search-container {
+    padding: 8px 12px;
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+    z-index: 10;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 4px;
+}
+
+.filter-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.filter-search-icon {
+    position: absolute;
+    left: 10px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.filter-search-input {
+    width: 100%;
+    padding: 8px 12px 8px 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-size: 0.81rem;
+    background: var(--bg);
+    color: var(--text);
+    transition: all var(--transition);
+}
+
+.filter-search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+    background: var(--card-bg);
+}
+
+/* Hide non-matching items */
+.filter-checkbox-item.hidden {
+    display: none;
+}
+
 /* ---- Favorites ---- */
 .fav-star-btn {
     background: none;
@@ -3154,4 +3261,54 @@ body {
     background: rgba(156, 163, 175, 0.1);
     color: var(--text-muted);
     border-color: transparent;
+}
+
+/* ---- Skeleton Utility ---- */
+.skeleton {
+    background-color: var(--skeleton-bg);
+    background-image: var(--skeleton-shimmer);
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    display: inline-block;
+    line-height: 1;
+    position: relative;
+    overflow: hidden;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    border-radius: 4px;
+}
+
+@keyframes skeleton-shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+
+.skeleton-text {
+    height: 0.8em;
+    width: 100%;
+    margin-bottom: 4px;
+}
+
+.skeleton-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.skeleton-rect {
+    height: 100%;
+    width: 100%;
+}
+
+.skeleton-circle {
+    border-radius: 50%;
+}
+
+.skeleton-inline {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.chart-skeleton-placeholder {
+    height: 320px; /* Standard chart height */
+    width: 100%;
 }

@@ -137,6 +137,57 @@ function toggleFavorite(regAns) {
 
 // formatNumber/formatPercent now imported from utils/ui.js
 
+// ---- SKELETONS ----
+function renderSkeletons() {
+    const grid = document.getElementById("compareGrid");
+    if (!grid) return;
+
+    // Only show skeletons if we have saved data to load
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    if (saved.length === 0) return;
+
+    let html = "";
+    for (let i = 0; i < saved.length; i++) {
+        html += `
+            <div class="compare-card">
+                <div class="compare-card-header">
+                    <div class="skeleton skeleton-avatar"></div>
+                    <div style="flex: 1; margin-left: 12px;">
+                        <div class="skeleton skeleton-text" style="width: 80%;"></div>
+                        <div class="skeleton skeleton-text" style="width: 40%; height: 0.6rem;"></div>
+                    </div>
+                </div>
+                <div class="compare-card-body">
+                    <div class="skeleton skeleton-text" style="width: 100%; height: 2rem; margin-bottom: 12px;"></div>
+                    <div class="skeleton skeleton-text" style="width: 100%; height: 2rem;"></div>
+                </div>
+            </div>
+        `;
+    }
+    grid.innerHTML = html;
+
+    // Charts skeletons
+    const chartContainers = [
+        "barChart", "radarChart", "shareChart", "ageChart"
+    ];
+    chartContainers.forEach(id => {
+        const canvas = document.getElementById(id);
+        if (canvas) {
+            const container = canvas.parentElement;
+            if (container) {
+                const skeleton = document.createElement("div");
+                skeleton.className = "skeleton skeleton-rect chart-skeleton-placeholder";
+                skeleton.style.position = "absolute";
+                skeleton.style.top = "0";
+                skeleton.style.left = "0";
+                skeleton.style.zIndex = "5";
+                container.style.position = "relative";
+                container.appendChild(skeleton);
+            }
+        }
+    });
+}
+
 function renderCards() {
     const grid = document.getElementById("compareGrid");
     const tagsBox = document.getElementById("compareSelectedTags");
@@ -360,6 +411,9 @@ function getMatchScore(query, text) {
 function renderCharts() {
     const chartsContainer = document.getElementById("chartsContainer");
     if (!chartsContainer || selectedOperators.length === 0) return;
+
+    // Remove skeletons
+    document.querySelectorAll(".chart-skeleton-placeholder").forEach(el => el.remove());
 
     chartsContainer.style.display = "block";
 
@@ -849,6 +903,7 @@ function initSearch() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     initTheme();
+    renderSkeletons();
 
     // Load components first
     await Promise.all([

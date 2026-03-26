@@ -28,6 +28,44 @@ function updateFavBtnState() {
     btn.querySelector('.fav-count').textContent = count > 0 ? `(${count})` : '';
 }
 
+// ---- SKELETONS ----
+function renderKPISkeletons() {
+    const kpiIds = ["kpiTraders", "kpiModalities", "kpiActivePerc", "kpiBeneficiarios"];
+    kpiIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<span class="skeleton skeleton-text" style="width: 60px; height: 1.8rem;"></span>';
+    });
+}
+
+function renderTableSkeletons() {
+    if (!tableBody) return;
+    const rows = 8;
+    const colCount = 4; // Approximated
+    let html = "";
+    for (let i = 0; i < rows; i++) {
+        html += `
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div style="flex: 1;">
+                            <div class="skeleton skeleton-text" style="width: 70%;"></div>
+                            <div class="skeleton skeleton-text" style="width: 40%; height: 0.6rem;"></div>
+                        </div>
+                    </div>
+                </td>
+                <td><div class="skeleton skeleton-text" style="width: 80px;"></div></td>
+                <td>
+                    <div class="skeleton skeleton-text" style="width: 100px;"></div>
+                    <div class="skeleton skeleton-text" style="width: 40px; height: 0.6rem;"></div>
+                </td>
+                <td><div class="skeleton skeleton-text" style="width: 60px;"></div></td>
+            </tr>
+        `;
+    }
+    tableBody.innerHTML = html;
+}
+
 // ---- HELPERS ----
 function formatCNPJ(cnpj) {
     if (!cnpj) return "";
@@ -147,6 +185,11 @@ async function initApp() {
 
     // Initialize Sidebar logic
     initSidebar();
+
+    // Cache DOM refs early for skeletons
+    initDOMRefs();
+    renderKPISkeletons();
+    renderTableSkeletons();
 
     // Load data in parallel
     await Promise.all([
@@ -481,12 +524,45 @@ function initEventListeners() {
         return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
     }
 
-    // Helper: update trigger text based on checked count
     function updateTriggerText(wrapper, defaultText) {
         const trigger = wrapper.querySelector('.filter-dropdown-text');
         const count = wrapper.querySelectorAll('input[type="checkbox"]:checked').length;
         trigger.textContent = count > 0 ? `${count} selecionado${count > 1 ? 's' : ''}` : defaultText;
     }
+
+    // ---- Fuzzy Search Logic ----
+    function normalizeText(text) {
+        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function setupFuzzyFilter(inputId, listId) {
+        const input = document.getElementById(inputId);
+        const list = document.getElementById(listId);
+        if (!input || !list) return;
+
+        input.addEventListener('input', (e) => {
+            const searchTerm = normalizeText(e.target.value);
+            const items = list.querySelectorAll('.filter-checkbox-item');
+
+            items.forEach(item => {
+                const text = normalizeText(item.textContent);
+                item.classList.toggle('hidden', searchTerm && !text.includes(searchTerm));
+            });
+        });
+    }
+
+    function resetFuzzyFilters() {
+        ['searchModality', 'searchUF'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.value = '';
+                input.dispatchEvent(new Event('input'));
+            }
+        });
+    }
+
+    setupFuzzyFilter('searchModality', 'filterModalityList');
+    setupFuzzyFilter('searchUF', 'filterUFList');
 
     // Toggle dropdowns
     const filterModalityWrapper = document.getElementById('filterModalityWrapper');
@@ -545,6 +621,8 @@ function initEventListeners() {
             // Update trigger texts
             updateTriggerText(filterModalityWrapper, 'Todas as Modalidades');
             updateTriggerText(filterUFWrapper, 'Todos os Estados');
+            // Reset fuzzy search inputs
+            resetFuzzyFilters();
             // Close any open dropdowns
             filterModalityWrapper.classList.remove('open');
             filterUFWrapper.classList.remove('open');
@@ -595,6 +673,7 @@ function initEventListeners() {
             // Reset trigger texts and close dropdowns
             updateTriggerText(filterModalityWrapper, 'Todas as Modalidades');
             updateTriggerText(filterUFWrapper, 'Todos os Estados');
+            resetFuzzyFilters();
             filterModalityWrapper.classList.remove('open');
             filterUFWrapper.classList.remove('open');
 
