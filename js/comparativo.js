@@ -2,6 +2,7 @@ import { store } from './services/store.js';
 import { initSidebar } from './sidebar.js';
 import { openOperatorModal } from './components/operator_modal.js';
 import { loadComponent, showToast, formatNumber, formatPercent } from './utils/ui.js';
+import { smartSearch, normalizeText } from './utils/search.js';
 
 let allOperatorsArray = [];
 let selectedOperators = [];
@@ -375,37 +376,44 @@ function levenshtein(a, b) {
 }
 
 function getMatchScore(query, text) {
-    query = query || "";
-    text = text || "";
-    const cleanQuery = query.toLowerCase().trim();
-    const cleanText = text.toLowerCase().trim();
+    if (!query) return 1000;
+    if (!text) return 1000;
 
-    // Highest priority for exact total match
-    if (cleanText === cleanQuery) return -100;
+    const normQuery = normalizeText(query);
+    const normTarget = normalizeText(text);
 
-    // High priority if the text starts exactly with the query
-    if (cleanText.startsWith(cleanQuery + " ")) return -50;
-    if (cleanText.startsWith(cleanQuery)) return -40;
+    // Highest priority: Exact match (normalized)
+    if (normTarget === normQuery) return -100;
 
-    const cleanWord = (w) => w.replace(/ de | da | do | dos | das | e /g, ' ').trim();
-    const qWords = cleanWord(cleanQuery).split(/\s+/).filter(w => w.length > 0);
-    const tWords = cleanWord(cleanText).split(/\s+/).filter(w => w.length > 0);
+    // High priority: Starts with query
+    if (normTarget.startsWith(normQuery)) return -50;
 
-    let score = 0;
-    for (const qw of qWords) {
-        let bestDist = 999;
-        for (const tw of tWords) {
-            if (tw === qw) { bestDist = 0; break; }
-            if (tw.startsWith(qw)) { bestDist = Math.min(bestDist, 0.1); }
-            if (tw.includes(qw)) { bestDist = Math.min(bestDist, 0.5); }
-            const dist = levenshtein(qw, tw);
-            if (dist < bestDist) bestDist = dist;
-        }
-        score += bestDist;
-    }
-    // slight penalty for much longer target names, to prefer exact matches
-    score += Math.max(0, tWords.length - qWords.length) * 0.1;
-    return score;
+    // Smart Match: If all keywords match
+    if (smartSearch(text, query)) return -30;
+
+    // Fallback to fuzzy word matching
+    const stopWords = ["de", "da", "do", "dos", "das", "e", "a", "o", "com", "em"];
+    const qWords = normQuery.split(/\s+/).filter(w => w.length > 1 && !stopWords.includes(w));
+    const tWords = normTarget.split(/\s+/).filter(w => w.length > 1 && !stopWords.includes(w));
+
+    if (qWords.length === 0) return normTarget.includes(normQuery) ? 0 : 999;
+
+    let totalDist = 0;
+    qWords.forEach(qw => {
+        let minDist = 999;
+        tWords.forEach(tw => {
+            if (tw === qw) minDist = 0;
+            else if (tw.startsWith(qw)) minDist = Math.min(minDist, 0.1);
+            else if (tw.includes(qw)) minDist = Math.min(minDist, 0.5);
+            else {
+                const dist = levenshtein(qw, tw);
+                minDist = Math.min(minDist, dist);
+            }
+        });
+        totalDist += minDist;
+    });
+
+    return totalDist + (Math.max(0, tWords.length - qWords.length) * 0.1);
 }
 
 function renderCharts() {

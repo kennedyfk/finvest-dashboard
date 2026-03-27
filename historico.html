@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico Financeiro Profundo | Finvest</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .history-container {
+            padding: var(--space-xl);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-xl);
+        }
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition);
+        }
+        .back-link:hover {
+            color: var(--primary);
+        }
+        .operator-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: var(--space-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            box-shadow: var(--shadow-sm);
+        }
+        .op-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--bg);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            flex-shrink: 0;
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+        }
+        .op-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 10px;
+        }
+        .op-info h1 {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+        .op-meta {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            display: flex;
+            gap: 16px;
+        }
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .chart-full {
+            grid-column: 1 / -1;
+        }
+        .data-table-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            overflow: hidden;
+        }
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+        .history-table th {
+            text-align: left;
+            padding: 12px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--border-light);
+        }
+        .history-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.875rem;
+        }
+        .positive { color: var(--success); }
+        .negative { color: var(--danger); }
+        
+        @media (max-width: 1024px) {
+            .charts-section { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Container (loaded via JS) -->
+        <div id="sidebarContainer"></div>
+
+        <main class="main-content">
+            <div class="history-container">
+                <div class="header-actions">
+                    <a href="index.html" class="back-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+                        </svg>
+                        Voltar ao Dashboard
+                    </a>
+                    <div class="theme-actions">
+                        <button class="icon-btn" id="themeToggle" title="Alternar Tema">
+                            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="operator-header" id="operatorHeader">
+                    <div class="op-logo" id="opLogo">A</div>
+                    <div class="op-info">
+                        <h1 id="opName">Carregando...</h1>
+                        <div class="op-meta" id="opMeta">
+                            <span>ANS: ---</span>
+                            <span>Modalidade: ---</span>
+                            <span>Localidade: ---</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Receita Acumulada (10 anos)</div>
+                        <div class="kpi-value" id="kpiTotalRevenue">R$ 0,00</div>
+                        <div class="kpi-trend positive">Simulado</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Lucro Médio Anual</div>
+                        <div class="kpi-value" id="kpiAvgProfit">R$ 0,00</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Margem Média</div>
+                        <div class="kpi-value" id="kpiAvgMargin">0.0%</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Sinistralidade Média</div>
+                        <div class="kpi-value" id="kpiAvgLoss">0.0%</div>
+                    </div>
+                </div>
+
+                <div class="charts-section">
+                    <div class="chart-card chart-full">
+                        <h3 class="chart-title">Evolução Financeira Trimestral (10 anos)</h3>
+                        <div id="chartFinancials" style="height: 350px;"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Distribuição de Lucro vs Prejuízo</h3>
+                        <div id="chartProfitability" style="height: 300px;"></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Evolução de Beneficiários</h3>
+                        <div id="chartBeneficiaries" style="height: 300px;"></div>
+                    </div>
+                </div>
+
+                <div class="data-table-section">
+                    <h3 class="chart-title">Histórico de Balanços Trimestrais</h3>
+                    <div class="table-responsive">
+                        <table class="history-table" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Período</th>
+                                    <th>Beneficiários</th>
+                                    <th>Receita Qtr</th>
+                                    <th>Sinistros Qtr</th>
+                                    <th>Lucro Líquido</th>
+                                    <th>Sinistralidade</th>
+                                    <th>Margem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script type="module" src="js/historico.js"></script>
+</body>
+</html>

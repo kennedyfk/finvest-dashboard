@@ -2,6 +2,7 @@ import { store } from './services/store.js';
 import { initSidebar } from './sidebar.js';
 import { openOperatorModal } from './components/operator_modal.js';
 import { loadComponent, showToast, formatNumber, formatPercent } from './utils/ui.js';
+import { smartSearch, normalizeText } from './utils/search.js';
 
 // ---- STATE ----
 let operatorsData = {};
@@ -340,13 +341,14 @@ function renderTable() {
     }
 
     // 4. Global Search
-    const query = (searchInput && searchInput.value) ? searchInput.value.toLowerCase().trim() : "";
+    const query = (searchInput && searchInput.value) ? searchInput.value.trim() : "";
     if (query) {
         filteredData = filteredData.filter(op =>
-            op.Razao_Social.toLowerCase().includes(query) ||
-            (op.Nome_Fantasia && op.Nome_Fantasia.toLowerCase().includes(query)) ||
-            op.CNPJ.includes(query) ||
-            (op.Cidade && op.Cidade.toLowerCase().includes(query))
+            smartSearch(op.Razao_Social, query) ||
+            (op.Nome_Fantasia && smartSearch(op.Nome_Fantasia, query)) ||
+            (op.CNPJ && op.CNPJ.includes(query)) ||
+            (op.Registro_ANS && op.Registro_ANS.toString().includes(query)) ||
+            (op.Cidade && smartSearch(op.Cidade, query))
         );
     }
 
@@ -416,18 +418,20 @@ function renderTable() {
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                         </svg>
                     </button>
-                    <div class="advertiser-logo">
-                        <img src="${logoPath}" alt="${op.Nome_Fantasia || op.Razao_Social}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(op.Nome_Fantasia || op.Razao_Social)}&background=f74b4b&color=fff'">
-                    </div>
-                    <div class="advertiser-info">
-                        <span class="advertiser-name clickable-name" data-index="${startIdx + index}">
-                            ${op.Nome_Fantasia || op.Razao_Social}
-                            <span class="cc-badge ${statusClass}">${op.Status_Operadora}</span>
-                        </span>
-                        <span class="advertiser-stats">
-                            ANS: ${op.Registro_ANS}
-                        </span>
-                        ${!isAtiva && op.Motivo_do_Descredenciamento ? `<span class="advertiser-stats" style="color:var(--danger);font-size:0.68rem;">${op.Motivo_do_Descredenciamento}</span>` : ''}
+                    <div class="advertiser-main-info clickable-name" data-index="${startIdx + index}">
+                        <div class="advertiser-logo">
+                            <img src="${logoPath}" alt="${op.Nome_Fantasia || op.Razao_Social}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(op.Nome_Fantasia || op.Razao_Social)}&background=f74b4b&color=fff'">
+                        </div>
+                        <div class="advertiser-info">
+                            <span class="advertiser-name">
+                                ${op.Nome_Fantasia || op.Razao_Social}
+                                <span class="cc-badge ${statusClass}">${op.Status_Operadora}</span>
+                            </span>
+                            <span class="advertiser-stats">
+                                ANS: ${op.Registro_ANS}
+                            </span>
+                            ${!isAtiva && op.Motivo_do_Descredenciamento ? `<span class="advertiser-stats" style="color:var(--danger);font-size:0.68rem;">${op.Motivo_do_Descredenciamento}</span>` : ''}
+                        </div>
                     </div>
                 </div>
             </td>
@@ -531,9 +535,7 @@ function initEventListeners() {
     }
 
     // ---- Fuzzy Search Logic ----
-    function normalizeText(text) {
-        return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    }
+    // Use the imported normalizeText from ./utils/search.js
 
     function setupFuzzyFilter(inputId, listId) {
         const input = document.getElementById(inputId);
@@ -825,13 +827,13 @@ function initEventListeners() {
         const favBtn = document.getElementById("favoriteBtn");
         favBtn.classList.toggle("active", isFav);
         favBtn.title = isFav ? "Remover dos favoritos" : "Adicionar aos favoritos";
-        
+
         if (isFav) {
             showToast(`${currentModalTrader.Nome_Fantasia || currentModalTrader.Razao_Social} adicionado aos favoritos ★`, "success");
         } else {
             showToast(`${currentModalTrader.Nome_Fantasia || currentModalTrader.Razao_Social} removido dos favoritos`, "info");
         }
-        
+
         // Refresh table to reflect favorite change in background
         renderTable();
         updateFavBtnState();

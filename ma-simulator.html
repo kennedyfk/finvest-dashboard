@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador M&A — SaúdePortal</title>
+    <meta name="description" content="Simulação de Fusões e Aquisições de Operadoras de Saúde.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=13">
+    <style>
+        .simulator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .sim-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sim-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .op-selector-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .op-search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-body);
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .op-search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(247, 75, 75, 0.1);
+        }
+
+        .op-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            margin-top: 8px;
+            z-index: 100;
+            max-height: 250px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .op-results-dropdown.active {
+            display: block;
+        }
+
+        .op-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .op-item:last-child {
+            border-bottom: none;
+        }
+
+        .op-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .pro-forma-result {
+            grid-column: span 2;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-body));
+            border: 2px dashed var(--primary);
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .pro-forma-result.active {
+            opacity: 1;
+            border-style: solid;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .diff-tag {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .diff-up { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .diff-down { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        @media (max-width: 1024px) {
+            .simulator-grid { grid-template-columns: 1fr; }
+            .pro-forma-result { grid-column: auto; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <div id="sidebarContainer"></div>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                            <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <span class="breadcrumb">Análises / Simulador M&A</span>
+                </div>
+                <div class="top-bar-right">
+                    <button class="theme-toggle" id="themeToggle">
+                        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <div>
+                        <h1>Simulador de Fusões e Aquisições (M&A)</h1>
+                        <p style="color:var(--text-muted); margin-top:4px;">Simule o impacto estratégico da combinação de duas operadoras.</p>
+                    </div>
+                </div>
+
+                <div class="simulator-grid">
+                    <!-- Acquirer Selection -->
+                    <div class="sim-card">
+                        <div class="sim-card-header">
+                            <div class="kpi-icon" style="background:#f74b4b; color:white;">A</div>
+                            <h3>Operadora Adquirente</h3>
+                        </div>
+                        <div class="op-selector-box">
+                            <input type="text" class="op-search-input" id="acquirerSearch" placeholder="Buscar adquirente...">
+                            <div class="op-results-dropdown" id="acquirerResults"></div>
+                        </div>
+                        <div id="acquirerInfo" style="display:none;">
+                            <div class="kpi-info" style="margin-top:20px;">
+                                <div style="font-size:1.1rem; font-weight:700; color:var(--primary);" id="acquirerName">-</div>
+                                <div style="font-size:0.85rem; color:var(--text-muted);" id="acquirerANS">ANS: -</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Target Selection -->
+                    <div class="sim-card">
+                        <div class="sim-card-header">
+                            <div class="kpi-icon" style="background:#64748b; color:white;">B</div>
+                            <h3>Operadora Alvo (Target)</h3>
+                        </div>
+                        <div class="op-selector-box">
+                            <input type="text" class="op-search-input" id="targetSearch" placeholder="Buscar alvo...">
+                            <div class="op-results-dropdown" id="targetResults"></div>
+                        </div>
+                        <div id="targetInfo" style="display:none;">
+                            <div class="kpi-info" style="margin-top:20px;">
+                                <div style="font-size:1.1rem; font-weight:700; color:var(--text-main);" id="targetName">-</div>
+                                <div style="font-size:0.85rem; color:var(--text-muted);" id="targetANS">ANS: -</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pro-forma Results -->
+                    <div class="sim-card pro-forma-result" id="proFormaCard">
+                        <div style="text-align:center; padding:40px;" id="emptyState">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="color:var(--border); margin-bottom:15px;">
+                                <path d="M12 2v20M2 12h20M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
+                            </svg>
+                            <h3>Selecione as operadoras para simular</h3>
+                            <p style="color:var(--text-muted);">A combinação Pro-forma aparecerá aqui.</p>
+                        </div>
+
+                        <div id="simulationResult" style="display:none;">
+                            <div class="sim-card-header" style="justify-content: space-between;">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div class="kpi-icon" style="background:linear-gradient(135deg, #f74b4b, #64748b); color:white;">Σ</div>
+                                    <h3>Nova Entidade Combinada (Pro-forma)</h3>
+                                </div>
+                                <button class="filter-btn-secondary" id="resetSim">Limpar Simulação</button>
+                            </div>
+
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Indicador</th>
+                                        <th>Atual (Adquirente)</th>
+                                        <th>Combinado (Pro-forma)</th>
+                                        <th>Impacto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resultTableBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+
+                            <div style="margin-top:30px; display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                                <div class="sim-card" style="background:var(--bg-body); border:none;">
+                                    <h4>Demografia de Idosos</h4>
+                                    <div id="ageChartContainer" style="height:10px; background:#eee; border-radius:5px; margin-top:10px; position:relative; overflow:hidden;">
+                                        <div id="ageBarA" style="height:100%; background:var(--primary); width:0%; position:absolute; left:0;"></div>
+                                        <div id="ageBarB" style="height:100%; background:#64748b; width:0%; position:absolute; left:0;"></div>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-top:8px;">
+                                        <span>Adquirente: <b id="ageLabelA">0%</b></span>
+                                        <span>Combinado: <b id="ageLabelCombined">0%</b></span>
+                                    </div>
+                                </div>
+                                <div class="sim-card" style="background:var(--bg-body); border:none;">
+                                    <h4>Escala Sugerida</h4>
+                                    <div style="font-size:2rem; font-weight:800; color:var(--primary);" id="scaleLabel">1X</div>
+                                    <p style="font-size:0.8rem; color:var(--text-muted);" id="scaleDescription">Aumento de 0% na base.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="operatorModalContainer"></div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script type="module" src="js/ma-simulator.js?v=14"></script>
+</body>
+
+</html>

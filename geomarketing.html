@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geomarketing de Saúde | Finvest Dashboard</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="light-theme">
+    <div class="app-container">
+        <!-- Sidebar Container (Loaded via JS) -->
+        <div id="sidebarContainer"></div>
+
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="icon-btn sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="breadcrumb">
+                        <span class="breadcrumb-item">Analítico</span>
+                        <span class="breadcrumb-separator">/</span>
+                        <span class="breadcrumb-item active">Geomarketing de Saúde</span>
+                    </div>
+                </div>
+                <div class="top-bar-right">
+                    <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Alterar Tema">
+                        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            style="display:none;">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                    <button class="notification-btn" id="notifBtn" aria-label="Notifications">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20"
+                            height="20">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span class="notif-badge">3</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="page-intro">
+                    <h1 class="page-title">Distribuição Geográfica</h1>
+                    <p class="page-subtitle">Mapa de calor por concentração de beneficiários e operadoras ativas.</p>
+                </div>
+
+                <div class="map-controls">
+                    <div class="operator-filter-wrapper">
+                        <div class="search-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"
+                                height="18">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="opSearchInput" placeholder="Digite Razão Social ou Registro ANS...">
+                            <div id="opSearchResults" class="search-results-dropdown"></div>
+                        </div>
+                        <div id="activeFilterBadge" class="active-filter-badge" style="display: none;">
+                            <span id="activeFilterName">Exibindo: <strong>Nome da Operadora</strong></span>
+                            <button id="clearFilterBtn" class="clear-filter-btn" title="Remover filtro">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"
+                                    height="14">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="geo-grid">
+                    <!-- Map Container -->
+                    <div class="map-card">
+                        <div id="map"></div>
+
+                        <!-- Map Legend -->
+                        <div class="map-overlay" id="mapLegend">
+                            <div class="map-legend-title">Vidas por Estado</div>
+                            <div id="legendContent">
+                                <!-- Generated via JS -->
+                            </div>
+                            <div class="legend-footer">
+                                <button id="resetViewBtn" class="reset-view-btn-sm" title="Ver Mapa Todo">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        width="14" height="14">
+                                        <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                                    </svg>
+                                    <span>Ver Mapa Todo</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Sidebar -->
+                    <aside class="geo-stats-panel">
+                        <div class="region-selector-card">
+                            <div class="region-title" id="selectedRegionName">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>Brasil (Consolidado)</span>
+                            </div>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 8px 0 0 0;">Selecione um
+                                estado no mapa para filtrar.</p>
+                        </div>
+
+                        <div class="geo-kpi">
+                            <div class="geo-kpi-label">Beneficiários Ativos</div>
+                            <div class="geo-kpi-value" id="kpiBeneficiarios">0</div>
+                        </div>
+
+                        <div class="geo-kpi">
+                            <div class="geo-kpi-label">Operadoras Ativas</div>
+                            <div class="geo-kpi-value" id="kpiOperadoras">0</div>
+                        </div>
+
+                        <div class="geo-kpi">
+                            <div class="geo-kpi-label">Concentração / km²</div>
+                            <div class="geo-kpi-value" id="kpiDensidade">--</div>
+                        </div>
+
+                        <div class="region-selector-card">
+                            <div class="map-legend-title" style="margin-bottom:12px;">Maiores Operadoras na Região</div>
+                            <div class="top-operators-list" id="topOperatorsList">
+                                <div style="color:var(--text-muted); font-size:0.8rem;">Carregando dados...</div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="operatorModalContainer"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- App Scripts -->
+    <script type="module" src="js/geomarketing.js"></script>
+</body>
+
+</html>

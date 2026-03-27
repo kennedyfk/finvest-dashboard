@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alertas Regulatórios — SaúdePortal</title>
+    <meta name="description" content="Painel de Alertas Regulatórios - IDSS, Insolvência e Reclamações.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=13">
+    <style>
+        .severity-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .severity-critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        .severity-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        .indicator-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar (loaded from components/sidebar.html) -->
+        <div id="sidebarContainer"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Navigation">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <span class="breadcrumb">Análises / Alertas Regulatórios</span>
+                </div>
+                <div class="top-bar-right">
+                    <div class="search-box" id="searchBox">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            width="18" height="18">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="text" placeholder="Digite Razão Social ou Registro ANS..." id="searchInput">
+                    </div>
+                    <button class="theme-toggle" id="themeToggle" title="Alternar modo escuro">
+                        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                    </button>
+                    <button class="notification-btn" id="notifBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        <span class="notif-badge">3</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <div>
+                        <h1>Painel de Alertas Regulatórios</h1>
+                        <p style="color:var(--text-muted); margin-top:4px;">Monitoramento de indicadores críticos e conformidade ANS.</p>
+                    </div>
+                    <div class="header-filters">
+                        <button class="filter-btn-secondary" id="favFilterBtn" style="gap:8px; display:inline-flex; align-items:center;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            <span>Favoritos</span>
+                            <span class="fav-count"></span>
+                        </button>
+                        <button class="filter-btn-secondary" id="favClearBtn" title="Limpar Favoritos" style="padding: 8px;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                        <button class="export-btn" id="exportBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
+                            <span>Exportar Relatório</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Cards specialized for Alerts -->
+                <div class="kpi-cards">
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                <line x1="12" y1="9" x2="12" y2="13" />
+                                <line x1="12" y1="17" x2="12.01" y2="17" />
+                            </svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiCriticalAlerts">0</span>
+                            <span class="kpi-label">Alertas Críticos</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiTotalWarnings">0</span>
+                            <span class="kpi-label">Avisos de Atenção</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22 4 12 14.01 9 11.01" />
+                            </svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiHealthScore">0.0</span>
+                            <span class="kpi-label">Média IDSS Setor</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                                <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                            </svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-value" id="kpiSolvency">0%</span>
+                            <span class="kpi-label">Índice Solvência Geral</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Type Tabs -->
+                <div class="crypto-tabs" id="alertTabs">
+                    <button class="crypto-tab active" data-type="all">
+                        <div class="crypto-tab-icon" style="background: #64748b;"><span>★</span></div>
+                        <div class="crypto-tab-info"><span class="crypto-tab-name">Todos</span></div>
+                    </button>
+                    <button class="crypto-tab" data-type="idss">
+                        <div class="crypto-tab-icon" style="background: #3b82f6;"><span>📊</span></div>
+                        <div class="crypto-tab-info"><span class="crypto-tab-name">IDSS Baixo</span></div>
+                    </button>
+                    <button class="crypto-tab" data-type="financeiro">
+                        <div class="crypto-tab-icon" style="background: #ef4444;"><span>💰</span></div>
+                        <div class="crypto-tab-info"><span class="crypto-tab-name">Insolvência</span></div>
+                    </button>
+                    <button class="crypto-tab" data-type="reclamacoes">
+                        <div class="crypto-tab-icon" style="background: #f59e0b;"><span>⚠</span></div>
+                        <div class="crypto-tab-info"><span class="crypto-tab-name">Reclamações</span></div>
+                    </button>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <table class="trade-table">
+                        <thead>
+                            <tr>
+                                    <th class="col-advertiser sortable" data-sort="name">Operadora <span class="sort-icon"></span></th>
+                                    <th class="col-beneficiary sortable current-sort desc" data-sort="lives">BENEF. ATIVOS <span class="sort-icon"></span></th>
+                                    <th>Tipo de Alerta</th>
+                                    <th>Indicador</th>
+                                    <th>Gravidade</th>
+                                    <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alertsTableBody">
+                            <!-- Rows populated by js/alertas.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals & Toasts -->
+    <div id="operatorModalContainer"></div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/alertas.js?v=14"></script>
+</body>
+
+</html>

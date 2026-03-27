@@ -10,7 +10,7 @@
  */
 export async function loadComponent(url, targetId) {
     try {
-        const response = await fetch(url);
+        const response = await fetch(`${url}?v=${new Date().getTime()}`);
         if (!response.ok) throw new Error(`Failed to load ${url}`);
         const html = await response.text();
         const container = document.getElementById(targetId);
@@ -64,4 +64,12 @@ export function formatNumber(num) {
 export function formatPercent(num) {
     if (num === undefined || num === null || isNaN(num)) return "—";
     return num.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
+}
+
+/**
+ * Formats a number to pt-BR currency.
+ */
+export function formatCurrency(num) {
+    if (num === undefined || num === null || isNaN(num)) return "R$ 0,00";
+    return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }

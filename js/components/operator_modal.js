@@ -174,7 +174,7 @@ export function openOperatorModal(op, benefDataDict) {
     document.querySelectorAll(".modal-tab").forEach(t => t.classList.remove("active"));
     document.querySelectorAll(".modal-tab-content").forEach(t => t.classList.remove("active"));
     const firstTabBtn = document.querySelector('.modal-tab[data-tab="details"]');
-    const firstTabCont = document.getElementById("tabDetails");
+    const firstTabCont = document.getElementById("details");
     if (firstTabBtn) firstTabBtn.classList.add("active");
     if (firstTabCont) firstTabCont.classList.add("active");
 
@@ -232,15 +232,23 @@ export function openOperatorModal(op, benefDataDict) {
 
     document.getElementById("rn518").innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">Indicadores RN518 Indisponível</div>`;
     document.getElementById("cbr").innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted);">Indicadores CBR Indisponível</div>`;
-    document.getElementById("modalConfirm").textContent = `Fechar Detalhes`;
 
     buyModal.classList.add("active");
 
     const modalClose = document.getElementById("modalClose");
     const modalConfirm = document.getElementById("modalConfirm");
+    const btnDeepHistory = document.getElementById("btnDeepHistory");
+
     const hideModal = () => buyModal.classList.remove("active");
     if (modalClose) modalClose.onclick = hideModal;
     if (modalConfirm) modalConfirm.onclick = hideModal;
+
+    if (btnDeepHistory) {
+        btnDeepHistory.onclick = () => {
+            window.location.href = `historico.html?ans=${op.Registro_ANS}`;
+        };
+    }
+
     buyModal.onclick = (e) => { if (e.target === buyModal) hideModal(); }
 
     document.querySelectorAll(".modal-tab").forEach(tab => {

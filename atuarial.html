@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Atuarial — SaúdePortal</title>
+    <meta name="description" content="Análise técnica de provisões e risco demográfico de operadoras de saúde.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=13">
+    <style>
+        .actuarial-container {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        /* Sidebar-like controls */
+        .controls-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .risk-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .risk-table th, .risk-table td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .factor-pill {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.7rem;
+        }
+        .f-low { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .f-med { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .f-high { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        /* Dashboard Area */
+        .results-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .provision-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border-top: 4px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s;
+        }
+
+        .provision-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .provision-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .provision-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .provision-info {
+            font-size: 0.7rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Chart */
+        .chart-box {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .age-distribution-visual {
+            height: 280px;
+            display: flex;
+            align-items: flex-end;
+            gap: 16px;
+            padding: 20px 20px 40px 20px;
+            background: var(--bg-body);
+            border-radius: 12px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .age-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .age-bar {
+            width: 100%;
+            max-width: 60px;
+            background: var(--primary);
+            border-radius: 6px 6px 0 0;
+            transition: height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-height: 4px;
+        }
+
+        .age-bar::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .age-bar:hover::before {
+            content: attr(data-count);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-main);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            z-index: 10;
+        }
+
+        .compare-search-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            margin-bottom: 24px;
+        }
+
+        .compare-search-input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all var(--transition);
+            outline: none;
+        }
+
+        .compare-search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(247, 75, 75, 0.1);
+        }
+
+        .compare-search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 18px;
+            height: 18px;
+            z-index: 5;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-xl);
+            z-index: 1000;
+            max-height: 280px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: var(--shadow-lg);
+            animation: dropdownIn 0.2s ease;
+        }
+
+        /* Verdict Box */
+        .verdict-box {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border-left: 6px solid var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .info-tip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--border);
+            border-radius: 50%;
+            font-size: 0.6rem;
+            font-weight: 700;
+            cursor: help;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 1024px) {
+            .actuarial-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- O ID sidebarContainer DEVE bater com o que é carregado via JS -->
+        <div id="sidebarContainer"></div>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                            <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <nav class="breadcrumb">
+                        <span>Análises Técnicas</span> / <strong>Calculadora Atuarial</strong>
+                    </nav>
+                </div>
+                <div class="top-bar-right">
+                    <button class="theme-toggle" id="themeToggle">
+                        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                    </button>
+                    <button class="notification-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        </svg>
+                        <span class="notif-badge">2</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <section class="page-header">
+                    <div>
+                        <h1>Calculadora Atuarial Técnica</h1>
+                        <p style="color:var(--text-muted); margin-top:4px;">Gestão de Solvência e Provisionamento Técnico Baseado em Risco Demográfico.</p>
+                    </div>
+                </section>
+
+                <div class="actuarial-container">
+                    <!-- Left: Search & Static Refs -->
+                    <aside class="controls-pane">
+                        <section class="sim-card">
+                            <h3 style="font-size:0.95rem; margin-bottom:15px; color:var(--text-main);">1. SELECIONAR OPERADORA</h3>
+                            <div class="compare-search-wrap">
+                                <svg class="compare-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="11" cy="11" r="8" />
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                </svg>
+                                <input type="text" class="compare-search-input" id="opSearch"
+                                    placeholder="Digite Razão Social ou Registro ANS..." autocomplete="off">
+                                <div class="autocomplete-dropdown" id="opResults"></div>
+                            </div>
+                            <article id="selectedOpBox" style="display:none; margin-top:20px; padding:16px; background:var(--bg-body); border-radius:12px; border:1px solid var(--border);">
+                                <strong id="selectedOpName" style="color:var(--primary); display:block; font-size:0.9rem;">-</strong>
+                                <small id="selectedOpANS" style="color:var(--text-muted); display:block; margin-top:4px;">ANS: -</small>
+                            </article>
+                        </section>
+
+                        <section class="sim-card" style="margin-top:10px;">
+                            <h3 style="font-size:0.95rem; margin-bottom:10px; color:var(--text-main);">2. MATRIZ DE PONDERAÇÃO</h3>
+                            <table class="risk-table">
+                                <thead>
+                                    <tr><th>Faixa Etária</th><th>Fator</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>00 - 18 anos</td><td><span class="factor-pill f-low">0.82x</span></td></tr>
+                                    <tr><td>19 - 30 anos</td><td><span class="factor-pill f-low">1.00x</span></td></tr>
+                                    <tr><td>31 - 50 anos</td><td><span class="factor-pill f-med">1.75x</span></td></tr>
+                                    <tr><td>51 - 60 anos</td><td><span class="factor-pill f-med">2.80x</span></td></tr>
+                                    <tr><td>60+ anos</td><td><span class="factor-pill f-high">4.85x</span></td></tr>
+                                </tbody>
+                            </table>
+                            <footer style="font-size:0.65rem; color:var(--text-muted); margin-top:15px; line-height:1.5;">
+                                * Fatores técnicos baseados em benchmarks de sinistralidade hospitalar por faixa etária da ANS.
+                            </footer>
+                        </section>
+                    </aside>
+
+                    <!-- Right: Dynamic Results -->
+                    <main class="results-pane">
+                        <!-- Technical Cards -->
+                        <section class="summary-cards">
+                            <article class="provision-card" style="border-top-color: var(--success);">
+                                <span class="provision-label">PEONA Estimada <span class="info-tip" title="Provisão de Eventos Ocorridos e Não Avisados">?</span></span>
+                                <div class="provision-value" id="peonaValue">R$ 0,00</div>
+                                <div class="provision-info" style="color:var(--success);">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                    Próximo Ciclo (Mensal)
+                                </div>
+                            </article>
+                            <article class="provision-card" style="border-top-color: var(--info);">
+                                <span class="provision-label">IBNR Pro-forma <span class="info-tip" title="Incurred But Not Reported - Reservas de Liquidez">?</span></span>
+                                <div class="provision-value" id="ibnrValue">R$ 0,00</div>
+                                <div class="provision-info" style="color:var(--info);">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                    Reserva Técnica Necessária
+                                </div>
+                            </article>
+                            <article class="provision-card" style="border-top-color: var(--warning);">
+                                <span class="provision-label">Custo Ajustado / Vida <span class="info-tip" title="Custo técnico médio mensal ponderado pelo risco">?</span></span>
+                                <div class="provision-value" id="avgCostValue">R$ 0,00</div>
+                                <div class="provision-info" style="color:var(--warning);">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                                    Média Demográfica
+                                </div>
+                            </article>
+                        </section>
+
+                        <!-- Visual Distribution -->
+                        <section class="chart-box">
+                            <h3 style="font-size:1rem; margin-bottom:10px;">Perfil de Exposição Demográfica</h3>
+                            <div class="age-distribution-visual" id="ageBarChart">
+                                <div style="margin:auto; text-align:center; color:var(--text-muted);">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" width="48" height="48" style="opacity:0.2; margin-bottom:10px;">
+                                        <rect x="3" y="10" width="4" height="11" rx="1"/><rect x="10" y="3" width="4" height="18" rx="1"/><rect x="17" y="7" width="4" height="14" rx="1"/>
+                                    </svg>
+                                    <p>Selecione uma operadora para analisar o perfil etário.</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Expert Statement -->
+                        <article class="verdict-box" id="technicalVerdictContainer">
+                            <h3 style="font-size:1rem; margin-bottom:15px; color:var(--text-main);">Parecer Técnico Preliminar</h3>
+                            <div id="technicalVerdict" style="color:var(--text-secondary); line-height:1.7; font-size:0.9rem;">
+                                Aguardando parametrização da carteira...
+                            </div>
+                        </article>
+                    </main>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="operatorModalContainer"></div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script type="module" src="js/atuarial.js?v=14"></script>
+</body>
+
+</html>

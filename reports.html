@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Relatórios — SaúdePortal</title>
+    <meta name="description" content="Crie e exporte relatórios personalizados das operadoras de saúde.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=13">
+    <style>
+        .report-builder {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+            height: calc(100vh - 160px);
+            margin-top: 24px;
+        }
+
+        /* Library Panel */
+        .widget-library {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .widget-item {
+            background: var(--bg-body);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            user-select: none;
+        }
+
+        .widget-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .widget-item svg {
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        /* Canvas Area */
+        .report-canvas {
+            background: var(--bg-body);
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            min-height: 100%;
+        }
+
+        .canvas-placeholder {
+            margin: auto;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .report-widget {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        [data-theme="dark"] .report-widget {
+            background: var(--bg-card);
+        }
+
+        .remove-widget {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .report-widget:hover .remove-widget {
+            opacity: 1;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Print Styling */
+        @media print {
+            .sidebar, .top-bar, .widget-library, .page-header, .remove-widget, .header-filters {
+                display: none !important;
+            }
+            .app-container { display: block !important; }
+            .main-content { margin-left: 0 !important; padding: 0 !important; width: 100% !important; }
+            .content-wrapper { padding: 0 !important; max-width: 100% !important; }
+            .report-builder { display: block !important; height: auto !important; }
+            .report-canvas { border: none !important; padding: 0 !important; gap: 40px !important; }
+            .report-widget {
+                break-inside: avoid;
+                box-shadow: none !important;
+                border: 1px solid #eee !important;
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <div id="sidebarContainer"></div>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+                            <line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <span class="breadcrumb">Ferramentas / Gerador de Relatórios</span>
+                </div>
+                <div class="top-bar-right">
+                    <button class="theme-toggle" id="themeToggle">
+                        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                    </button>
+                    <button class="notification-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <div>
+                        <h1 id="reportTitle">Novo Relatório Executivo</h1>
+                        <p style="color:var(--text-muted); margin-top:4px;">Customize seu relatório arrastando ou clicando nos widgets ao lado.</p>
+                    </div>
+                    <div class="header-filters">
+                        <button class="filter-btn-primary" id="exportPDF">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                <polyline points="6 9 6 2 18 2 18 9" />
+                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                                <rect x="6" y="14" width="12" height="8" />
+                            </svg>
+                            <span>Imprimir / PDF</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-builder">
+                    <!-- Widget Library -->
+                    <aside class="widget-library">
+                        <h3 style="font-size:0.9rem; color:var(--text-muted); margin-bottom:10px;">WIDGETS DISPONÍVEIS</h3>
+                        
+                        <div class="widget-item" data-type="kpi_vitals">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                <rect x="2" y="2" width="20" height="20" rx="5" />
+                                <line x1="2" y1="12" x2="22" y2="12" />
+                            </svg>
+                            <span>KPIs Vitais</span>
+                        </div>
+
+                        <div class="widget-item" data-type="growth_chart">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                <polyline points="17 6 23 6 23 12" />
+                            </svg>
+                            <span>Gráfico de Crescimento</span>
+                        </div>
+
+                        <div class="widget-item" data-type="geo_map">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                            </svg>
+                            <span>Mapa de Concentração</span>
+                        </div>
+
+                        <div class="widget-item" data-type="alerts_table">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                <line x1="12" y1="9" x2="12" y2="13" />
+                            </svg>
+                            <span>Alertas Críticos</span>
+                        </div>
+
+                        <div class="widget-item" data-type="demographics">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                                <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                            </svg>
+                            <span>Mix de Carteira</span>
+                        </div>
+                    </aside>
+
+                    <!-- Canvas -->
+                    <div class="report-canvas" id="reportCanvas">
+                        <div class="canvas-placeholder" id="placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="60" height="60" style="margin-bottom:15px; opacity:0.3;">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="12" y1="18" x2="12" y2="12" />
+                                <line x1="9" y1="15" x2="15" y2="15" />
+                            </svg>
+                            <h3>Seu relatório está vazio</h3>
+                            <p>Clique ou arraste os widgets para começar a montar.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="operatorModalContainer"></div>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script type="module" src="js/reports.js?v=14"></script>
+</body>
+
+</html>
