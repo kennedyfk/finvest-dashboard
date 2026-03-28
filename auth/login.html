@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar — Portal ANS</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body>
+  <div class="auth-bg"></div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+
+      <!-- Logo -->
+      <div class="auth-logo">
+        <div class="auth-logo-icon">FD</div>
+        <div class="auth-logo-text">
+          <span class="auth-logo-name">Finvest Dashboard</span>
+          <span class="auth-logo-sub">Portal ANS · Dados de Saúde Suplementar</span>
+        </div>
+      </div>
+
+      <h1 class="auth-title">Bem-vindo de volta</h1>
+      <p class="auth-subtitle">Entre com sua conta para acessar os dados da ANS.</p>
+
+      <!-- Alerta global (erros de rede, brute-force, etc.) -->
+      <div class="auth-alert" id="globalAlert" role="alert" aria-live="polite">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="globalAlertMsg"></span>
+      </div>
+
+      <!-- OAuth -->
+      <div class="social-buttons">
+        <button class="btn-social" id="btnGoogle" type="button">
+          <!-- Google icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Entrar com Google
+        </button>
+
+        <button class="btn-social" id="btnGithub" type="button">
+          <!-- GitHub icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 .5C5.73.5.5 5.73.5 12c0 5.1 3.29 9.41 7.86 10.94.57.1.78-.25.78-.55v-2.02c-3.19.69-3.86-1.54-3.86-1.54-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.73-1.52-2.55-.29-5.23-1.27-5.23-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.17a10.94 10.94 0 0 1 5.73 0c2.18-1.48 3.14-1.17 3.14-1.17.63 1.58.23 2.75.11 3.04.74.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.37-5.25 5.65.41.36.78 1.06.78 2.14v3.17c0 .3.2.66.79.55C20.22 21.4 23.5 17.1 23.5 12 23.5 5.73 18.27.5 12 .5z"/>
+          </svg>
+          Entrar com GitHub
+        </button>
+      </div>
+
+      <div class="auth-divider"><span>ou entre com seu e-mail</span></div>
+
+      <!-- Formulário de login -->
+      <form class="auth-form" id="loginForm" novalidate autocomplete="on">
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="email">E-mail</label>
+          <div class="form-input-wrapper">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </span>
+            <input
+              class="form-input"
+              type="email"
+              id="email"
+              name="email"
+              placeholder="seu@email.com"
+              autocomplete="email"
+              required
+              maxlength="254"
+            >
+          </div>
+          <span class="form-message" id="emailMsg" aria-live="polite"></span>
+        </div>
+
+        <!-- Senha -->
+        <div class="form-group">
+          <div class="form-row">
+            <label class="form-label" for="password">Senha</label>
+            <a href="recover.html" class="form-link">Esqueci minha senha</a>
+          </div>
+          <div class="form-input-wrapper">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <input
+              class="form-input"
+              type="password"
+              id="password"
+              name="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+              maxlength="128"
+            >
+            <button type="button" class="toggle-password" id="togglePassword" aria-label="Mostrar/ocultar senha">
+              <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <span class="form-message" id="passwordMsg" aria-live="polite"></span>
+        </div>
+
+        <!-- Lembrar-me -->
+        <div class="form-row">
+          <label class="form-checkbox-label">
+            <input type="checkbox" id="rememberMe" name="rememberMe">
+            Lembrar meu acesso
+          </label>
+        </div>
+
+        <!-- Botão submit -->
+        <button type="submit" class="btn-auth" id="submitBtn">
+          <span id="btnText">Entrar</span>
+        </button>
+
+      </form>
+
+      <!-- Rodapé -->
+      <div class="auth-footer">
+        Não tem conta? <a href="register.html">Cadastre-se gratuitamente</a>
+      </div>
+
+    </div><!-- /.auth-card -->
+
+    <p class="page-footer">
+      Portal de Dados ANS · Finvest Dashboard<br>
+      Dados públicos da Agência Nacional de Saúde Suplementar
+    </p>
+  </div>
+
+  <!-- Supabase SDK (CDN) -->
+  <script src="../js/env.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    // ── Inicialização ──────────────────────────────────────────
+    const { supabase: sb } = AuthModule;
+
+    // Redirecionar se já estiver logado
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) window.location.replace('../index.html');
+    })();
+
+    // ── Refs ───────────────────────────────────────────────────
+    const form        = document.getElementById('loginForm');
+    const emailInput  = document.getElementById('email');
+    const passInput   = document.getElementById('password');
+    const emailMsg    = document.getElementById('emailMsg');
+    const passMsg     = document.getElementById('passwordMsg');
+    const submitBtn   = document.getElementById('submitBtn');
+    const btnText     = document.getElementById('btnText');
+    const toggleBtn   = document.getElementById('togglePassword');
+    const eyeIcon     = document.getElementById('eyeIcon');
+
+    // ── Toggle senha ───────────────────────────────────────────
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = passInput.type === 'password';
+      passInput.type = isPassword ? 'text' : 'password';
+      eyeIcon.innerHTML = isPassword
+        ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+           <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+           <line x1="1" y1="1" x2="23" y2="23"/>`
+        : `<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/>
+           <circle cx="12" cy="12" r="3"/>`;
+    });
+
+    // ── Validação em tempo real ────────────────────────────────
+    emailInput.addEventListener('blur', () => validateEmail());
+    passInput.addEventListener('input', () => {
+      passMsg.textContent = '';
+      passMsg.className = 'form-message';
+      passInput.classList.remove('error');
+    });
+
+    function validateEmail() {
+      const val = emailInput.value.trim();
+      if (!val) {
+        setFieldError(emailInput, emailMsg, 'Informe seu e-mail.');
+        return false;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        setFieldError(emailInput, emailMsg, 'E-mail inválido.');
+        return false;
+      }
+      setFieldSuccess(emailInput, emailMsg);
+      return true;
+    }
+
+    function setFieldError(input, msg, text) {
+      input.classList.add('error');
+      input.classList.remove('success');
+      msg.textContent = text;
+      msg.className = 'form-message error';
+    }
+
+    function setFieldSuccess(input, msg) {
+      input.classList.remove('error');
+      input.classList.add('success');
+      msg.textContent = '';
+      msg.className = 'form-message';
+    }
+
+    // ── Submit ─────────────────────────────────────────────────
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email    = sanitizeInput(emailInput.value.trim());
+      const password = passInput.value; // senha não é sanitizada — apenas validada
+
+      // Validação básica antes de enviar
+      if (!validateEmail()) return;
+      if (!password) {
+        setFieldError(passInput, passMsg, 'Informe sua senha.');
+        return;
+      }
+
+      setLoading(submitBtn, btnText, true);
+      showAlert('', '');
+
+      try {
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+
+        if (error) {
+          // Mensagens amigáveis sem expor detalhes de segurança
+          if (error.message.includes('Invalid login credentials')) {
+            showAlert('E-mail ou senha incorretos. Verifique os dados e tente novamente.', 'error');
+          } else if (error.message.includes('Email not confirmed')) {
+            showAlert('Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.', 'warning');
+          } else if (error.message.includes('rate limit') || error.status === 429) {
+            showAlert('Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.', 'error');
+          } else {
+            showAlert('Erro ao entrar. Tente novamente em instantes.', 'error');
+          }
+          return;
+        }
+
+        // Login bem-sucedido → redireciona
+        window.location.replace('../index.html');
+
+      } catch (err) {
+        showAlert('Erro de conexão. Verifique sua internet e tente novamente.', 'error');
+      } finally {
+        setLoading(submitBtn, btnText, false, 'Entrar');
+      }
+    });
+
+    // ── OAuth ──────────────────────────────────────────────────
+    document.getElementById('btnGoogle').addEventListener('click', async () => {
+      await AuthModule.signInWithProvider('google');
+    });
+
+    document.getElementById('btnGithub').addEventListener('click', async () => {
+      await AuthModule.signInWithProvider('github');
+    });
+  </script>
+</body>
+</html>

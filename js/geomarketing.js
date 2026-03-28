@@ -1,6 +1,6 @@
 import { initSidebar } from './sidebar.js';
 import { openOperatorModal } from './components/operator_modal.js';
-import { loadComponent, showToast, formatNumber } from './utils/ui.js';
+import { loadComponent, showToast, formatNumber, escapeHTML } from './utils/ui.js';
 import { smartSearch, normalizeText } from './utils/search.js';
 
 // Configuration
@@ -351,9 +351,9 @@ function initOperatorFilter() {
         if (matches.length > 0) {
             resultsDropdown.innerHTML = matches.map(ans => {
                 const op = allOperators[ans];
-                return `<div class="search-result-item" data-ans="${ans}">
-                    <strong>${op.Nome_Fantasia || op.Razao_Social}</strong><br/>
-                    <small>ANS: ${ans} | ${op.UF}</small>
+                return `<div class="search-result-item" data-ans="${escapeHTML(ans)}">
+                    <strong>${escapeHTML(op.Nome_Fantasia || op.Razao_Social)}</strong><br/>
+                    <small>ANS: ${escapeHTML(ans)} | ${escapeHTML(op.UF)}</small>
                 </div>`;
             }).join('');
             resultsDropdown.classList.add('active');
@@ -403,7 +403,7 @@ window.applyOperatorFilter = (ans) => {
     const searchInput = document.getElementById('opSearchInput');
 
     if (activeFilterName) {
-        activeFilterName.innerHTML = `Exibindo: <strong>${op.Nome_Fantasia || op.Razao_Social}</strong>`;
+        activeFilterName.innerHTML = `Exibindo: <strong>${escapeHTML(op.Nome_Fantasia || op.Razao_Social)}</strong>`;
     }
     if (filterBadge) {
         filterBadge.style.display = 'flex';

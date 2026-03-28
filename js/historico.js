@@ -4,9 +4,8 @@
  */
 
 import { dataService } from './services/data_service.js';
-import { loadComponent } from './utils/ui.js';
+import { loadComponent, formatNumber, formatPercent, escapeHTML } from './utils/ui.js';
 import { initSidebar } from './sidebar.js';
-import { formatNumber, formatPercent } from './utils/ui.js';
 
 async function initHistory() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -62,16 +61,16 @@ function renderHeader(info) {
     const name = info.Nome_Fantasia && info.Nome_Fantasia.trim() !== "" ? info.Nome_Fantasia : info.Razao_Social;
     opName.textContent = name;
     opMeta.innerHTML = `
-        <span>ANS: ${info.Registro_ANS}</span>
-        <span>Modalidade: ${info.Modalidade}</span>
-        <span>Localidade: ${info.Cidade} - ${info.UF}</span>
+        <span>ANS: ${escapeHTML(info.Registro_ANS)}</span>
+        <span>Modalidade: ${escapeHTML(info.Modalidade)}</span>
+        <span>Localidade: ${escapeHTML(info.Cidade)} - ${escapeHTML(info.UF)}</span>
     `;
 
     // Try loading logo
     const logoImg = new Image();
     const logoPath = `assets/logos/${info.Registro_ANS}.png`;
     logoImg.onload = () => {
-        opLogo.innerHTML = `<img src="${logoPath}" alt="${name}">`;
+        opLogo.innerHTML = `<img src="${logoPath}" alt="${escapeHTML(name)}">`;
         opLogo.style.background = "white";
     };
     logoImg.src = logoPath;

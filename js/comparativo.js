@@ -1,9 +1,8 @@
 import { store } from './services/store.js';
 import { initSidebar } from './sidebar.js';
 import { openOperatorModal } from './components/operator_modal.js';
-import { loadComponent, showToast, formatNumber, formatPercent } from './utils/ui.js';
+import { loadComponent, showToast, formatNumber, formatPercent, escapeHTML } from './utils/ui.js';
 import { smartSearch, normalizeText } from './utils/search.js';
-
 let allOperatorsArray = [];
 let selectedOperators = [];
 let globalBenefData = {};
@@ -31,6 +30,10 @@ const CHART_BG_COLORS = [
 
 // Globals ref dates
 let globalBenefRefDate = "";
+let displayBenefRefDate = "";
+
+// Levenshtein cache to improve search performance
+const levenshteinCache = new Map();
 
 // loadComponent now imported from utils/ui.js
 
@@ -86,6 +89,12 @@ async function loadData() {
         };
         const allDates = extractRefDates(globalBenefData[Object.keys(globalBenefData)[0]] || {});
         globalBenefRefDate = allDates.length > 0 ? allDates[0] : "";
+
+        // Format for display (DD/MM/YYYY)
+        if (globalBenefRefDate) {
+            const [y, m, d] = globalBenefRefDate.split('-');
+            displayBenefRefDate = `${d}/${m}/${y}`;
+        }
 
         // Merge logic
         Object.keys(cadopData).forEach(registroAns => {
@@ -153,14 +162,14 @@ function renderSkeletons() {
             <div class="compare-card">
                 <div class="compare-card-header">
                     <div class="skeleton skeleton-avatar"></div>
-                    <div style="flex: 1; margin-left: 12px;">
-                        <div class="skeleton skeleton-text" style="width: 80%;"></div>
-                        <div class="skeleton skeleton-text" style="width: 40%; height: 0.6rem;"></div>
+                    <div class="skeleton-info">
+                        <div class="skeleton skeleton-text skeleton-w80"></div>
+                        <div class="skeleton skeleton-text skeleton-w40 skeleton-h-sm"></div>
                     </div>
                 </div>
                 <div class="compare-card-body">
-                    <div class="skeleton skeleton-text" style="width: 100%; height: 2rem; margin-bottom: 12px;"></div>
-                    <div class="skeleton skeleton-text" style="width: 100%; height: 2rem;"></div>
+                    <div class="skeleton skeleton-text skeleton-w100 skeleton-h-lg skeleton-mb"></div>
+                    <div class="skeleton skeleton-text skeleton-w100 skeleton-h-lg"></div>
                 </div>
             </div>
         `;
@@ -178,11 +187,6 @@ function renderSkeletons() {
             if (container) {
                 const skeleton = document.createElement("div");
                 skeleton.className = "skeleton skeleton-rect chart-skeleton-placeholder";
-                skeleton.style.position = "absolute";
-                skeleton.style.top = "0";
-                skeleton.style.left = "0";
-                skeleton.style.zIndex = "5";
-                container.style.position = "relative";
                 container.appendChild(skeleton);
             }
         }
@@ -200,7 +204,8 @@ function renderCards() {
     document.getElementById("compareCountMsg").textContent = `${selectedOperators.length}/${MAX_COMPARE} selecionadas`;
 
     if (clearAllBtn) {
-        clearAllBtn.style.display = selectedOperators.length > 0 ? "block" : "none";
+        if (selectedOperators.length > 0) clearAllBtn.classList.remove("hidden");
+        else clearAllBtn.classList.add("hidden");
     }
 
     if (selectedOperators.length === 0) {
@@ -216,7 +221,7 @@ function renderCards() {
         `;
         // Hide charts on empty
         if (document.getElementById("chartsContainer")) {
-            document.getElementById("chartsContainer").style.display = "none";
+            document.getElementById("chartsContainer").classList.add("hidden");
         }
         return;
     }
@@ -239,11 +244,10 @@ function renderCards() {
         const tag = document.createElement("div");
         tag.className = "compare-selected-tag";
         tag.draggable = true;
-        tag.style.cssText = "background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); animation: fadeIn 0.3s ease; cursor: grab;";
         tag.innerHTML = `
-            <span style="font-weight: 600; color: var(--text); padding-right: 4px; border-right: 1px solid var(--border-light); cursor: pointer;" title="Arraste para reordenar" class="drag-handle">☰</span>
-            <span style="font-weight: 600; color: var(--text);">${name}</span>
-            <button class="remove-op-btn" style="background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 2px; margin-right: -4px; display: flex; align-items: center;" aria-label="Remover">
+            <span class="drag-handle" title="Arraste para reordenar">☰</span>
+            <span class="tag-label">${escapeHTML(name)}</span>
+            <button class="remove-op-btn" aria-label="Remover ${escapeHTML(name)}">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         `;
@@ -296,27 +300,29 @@ function renderCards() {
 
         // Verificando imagem
         const logoPath = `assets/logos/${op.Registro_ANS}.png`;
-        const avatarHtml = `<div class="cc-avatar modal-trigger" style="cursor:pointer;" id="avatar-${op.Registro_ANS}">${initial}</div>`;
+        const avatarHtml = `<div class="cc-avatar modal-trigger clickable" id="avatar-${op.Registro_ANS}">${initial}</div>`;
 
         card.innerHTML = `
             <div class="cc-header">
                 ${avatarHtml}
-                <div class="cc-title-wrap modal-trigger" style="cursor:pointer;">
-                    <span class="cc-subtitle">ANS: ${op.Registro_ANS}</span>
-                    <h3 class="cc-title" title="${op.Razao_Social}">${name}</h3>
-                    <span class="cc-badge ${statusClass}">${op.Status_Operadora}</span>
+                <div class="cc-title-wrap modal-trigger clickable">
+                    <span class="cc-subtitle">ANS: ${escapeHTML(op.Registro_ANS)}</span>
+                    <h3 class="cc-title" title="${escapeHTML(op.Razao_Social)}">${escapeHTML(name)}</h3>
+                    <span class="cc-badge ${statusClass}">${escapeHTML(op.Status_Operadora)}</span>
                 </div>
             </div>
             <div class="cc-metrics">
                 <div class="cc-metric">
                     <span class="cc-metric-label">Modalidade</span>
-                    <span class="cc-metric-value" style="font-size:1rem;">${op.Modalidade}</span>
+                    <span class="cc-metric-value cc-metric-value--small">${escapeHTML(op.Modalidade)}</span>
                 </div>
                 <div class="cc-divider"></div>
                 <div class="cc-metric">
                     <span class="cc-metric-label">Beneficiários Ativos</span>
-                    <span class="cc-metric-value ${isBWinner && selectedOperators.length > 1 ? 'winner' : ''}">${formatNumber(op.qt_beneficiario_ativo)}</span>
-                    <span class="cc-metric-sub">Ref: ${globalBenefRefDate || 'N/A'}</span>
+                    <span class="cc-metric-value ${isBWinner && selectedOperators.length > 1 ? 'winner' : ''}">
+                        ${formatNumber(op.qt_beneficiario_ativo)}
+                    </span>
+                    <span class="cc-metric-sub">Ref: ${escapeHTML(displayBenefRefDate) || 'N/A'}</span>
                 </div>
                 <div class="cc-metric">
                     <span class="cc-metric-label">% Idosos na Carteira</span>
@@ -325,16 +331,16 @@ function renderCards() {
                 <div class="cc-divider"></div>
                 <div class="cc-metric">
                     <span class="cc-metric-label">Razão Dep. de Idosos</span>
-                    <span class="cc-metric-value" style="font-size:1rem;">${formatNumber(op.razao_dependencia_de_idosos)}</span>
+                    <span class="cc-metric-value cc-metric-value--small">${formatNumber(op.razao_dependencia_de_idosos)}</span>
                 </div>
                 <div class="cc-metric">
                     <span class="cc-metric-label">Razão Renov. Geracional</span>
-                    <span class="cc-metric-value" style="font-size:1rem;">${formatNumber(op.razao_renovacao_geracional)}</span>
+                    <span class="cc-metric-value cc-metric-value--small">${formatNumber(op.razao_renovacao_geracional)}</span>
                 </div>
                 <div class="cc-divider"></div>
                 <div class="cc-metric">
                     <span class="cc-metric-label">Localização</span>
-                    <span class="cc-metric-value" style="font-size:1rem;">${op.Cidade} - ${op.UF}</span>
+                    <span class="cc-metric-value cc-metric-value--small">${escapeHTML(op.Cidade)} - ${escapeHTML(op.UF)}</span>
                 </div>
             </div>
         `;
@@ -346,7 +352,7 @@ function renderCards() {
         img.onload = () => {
             const av = document.getElementById(`avatar-${op.Registro_ANS}`);
             if (av) {
-                av.innerHTML = `<img src="${logoPath}" alt="${name}">`;
+                av.innerHTML = `<img src="${logoPath}" alt="${escapeHTML(name)}">`;
             }
         };
         img.src = logoPath;
@@ -361,6 +367,9 @@ function renderCards() {
 }
 
 function levenshtein(a, b) {
+    const key = `${a}|${b}`;
+    if (levenshteinCache.has(key)) return levenshteinCache.get(key);
+
     if (a.length === 0) return b.length;
     if (b.length === 0) return a.length;
     var matrix = [];
@@ -372,7 +381,9 @@ function levenshtein(a, b) {
             else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
         }
     }
-    return matrix[b.length][a.length];
+    const res = matrix[b.length][a.length];
+    levenshteinCache.set(key, res);
+    return res;
 }
 
 function getMatchScore(query, text) {
@@ -423,7 +434,8 @@ function renderCharts() {
     // Remove skeletons
     document.querySelectorAll(".chart-skeleton-placeholder").forEach(el => el.remove());
 
-    chartsContainer.style.display = "block";
+    chartsContainer.classList.remove("hidden");
+    chartsContainer.style.display = "block"; // Keep as block for radar layout legacy but hidden class should handle it
 
     const operatorLabels = selectedOperators.map(op => {
         const name = op.Nome_Fantasia || op.Razao_Social || op.Registro_ANS.toString();
@@ -614,7 +626,7 @@ function renderCharts() {
                         </div>
                         ${selectedOperators.map((op, idx) => `
                             <div class="benchmark-cell header-cell">
-                                <div class="cell-content" title="${operatorLabels[idx]}">${operatorLabels[idx]}</div>
+                                <div class="cell-content" title="${escapeHTML(operatorLabels[idx])}">${escapeHTML(operatorLabels[idx])}</div>
                                 <div class="operator-bar" style="background: ${CHART_COLORS[idx % CHART_COLORS.length]};"></div>
                             </div>
                         `).join('')}
@@ -712,7 +724,7 @@ function renderCharts() {
                     <td>
                         <div class="metric-label" style="display:flex; align-items:center; gap:8px; background:transparent; padding:0;">
                             <span style="display:inline-block; width:10px; height:10px; background:${CHART_COLORS[index]}; border-radius:50%; flex-shrink:0;"></span>
-                            <span style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;" title="${operatorLabels[index]}">${operatorLabels[index]}</span>
+                            <span style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;" title="${escapeHTML(operatorLabels[index])}">${escapeHTML(operatorLabels[index])}</span>
                         </div>
                     </td>
                     <td>${val.toLocaleString('pt-BR')}</td>
@@ -816,7 +828,7 @@ function renderCharts() {
                     <td>
                         <div class="metric-label" style="display:flex; align-items:center; gap:8px; background:transparent; padding:0;">
                             <span style="display:inline-block; width:10px; height:10px; background:${CHART_COLORS[index]}; border-radius:50%; flex-shrink:0;"></span>
-                            <span style="max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;" title="${operatorLabels[index]}">${operatorLabels[index]}</span>
+                            <span style="max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;" title="${escapeHTML(operatorLabels[index])}">${escapeHTML(operatorLabels[index])}</span>
                         </div>
                     </td>
                     <td>${j.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%</td>
@@ -828,6 +840,15 @@ function renderCharts() {
         ageTableHtml += `</tbody></table>`;
         const ageContainer = document.getElementById('ageTableContainer');
         if (ageContainer) ageContainer.innerHTML = ageTableHtml;
+    }
+}
+
+function initPDFExport() {
+    const btn = document.getElementById("exportPDFBtn");
+    if (btn) {
+        btn.addEventListener("click", () => {
+            window.print();
+        });
     }
 }
 
@@ -880,8 +901,8 @@ function initSearch() {
                 item.className = "autocomplete-item";
                 const name = op.Nome_Fantasia || op.Razao_Social;
                 item.innerHTML = `
-                    <span class="ac-name">${name}</span>
-                    <span class="ac-ans">Registro ANS: ${op.Registro_ANS} - ${op.UF}</span>
+                    <span class="ac-name">${escapeHTML(name)}</span>
+                    <span class="ac-ans">Registro ANS: ${escapeHTML(op.Registro_ANS)} - ${escapeHTML(op.UF)}</span>
                 `;
                 item.addEventListener("click", () => {
                     if (selectedOperators.length >= MAX_COMPARE) {
@@ -924,5 +945,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await loadData();
     initSearch();
+    initTheme();
+    initPDFExport();
     renderCards();
 });

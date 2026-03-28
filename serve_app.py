@@ -21,7 +21,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 try:
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print(f"Server local: http://localhost:{PORT}")
-        print(f"Acesso pelo celular: http://192.168.1.176:{PORT}")
         httpd.serve_forever()
 except Exception as e:
     print(f"Error: {e}")

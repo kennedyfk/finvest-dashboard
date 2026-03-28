@@ -1,7 +1,7 @@
 import { store } from './services/store.js';
 import { initSidebar } from './sidebar.js';
 import { openOperatorModal } from './components/operator_modal.js';
-import { loadComponent, showToast, formatNumber, formatPercent } from './utils/ui.js';
+import { loadComponent, showToast, formatNumber, formatPercent, escapeHTML } from './utils/ui.js';
 import { smartSearch, normalizeText } from './utils/search.js';
 
 // ---- STATE ----
@@ -406,44 +406,57 @@ function renderTable() {
         const initial = op.Nome_Fantasia ? op.Nome_Fantasia.charAt(0) : op.Razao_Social.charAt(0);
         const color = ["purple", "indigo", "blue", "pink", "green", "orange", "red", "teal"][index % 8];
         const logoPath = `assets/logos/${op.Registro_ANS}.png`;
-
         const isFav = store.favorites.has(op.Registro_ANS.toString());
+        const statusClass = op.Status_Operadora === "ATIVA" ? "ativa" : "cancelada";
 
-        let statusClass = op.Status_Operadora === "ATIVA" ? "ativa" : "cancelada";
+        // Sanitize data for innerHTML
+        const safeName = escapeHTML(op.Nome_Fantasia || op.Razao_Social);
+        const safeANS = escapeHTML(op.Registro_ANS.toString());
+        const safeModalidade = escapeHTML(op.Modalidade || "N/A");
+        const safeCidade = escapeHTML(op.Cidade || "N/A");
+        const safeUF = escapeHTML(op.UF || "");
+        const safeMotivo = escapeHTML(op.Motivo_do_Descredenciamento || "");
+
         row.innerHTML = `
             <td>
                 <div class="advertiser-cell">
-                    <button class="fav-star-btn ${isFav ? 'active' : ''}" data-reg="${op.Registro_ANS}" title="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
+                    <button class="fav-star-btn ${isFav ? 'active' : ''}" 
+                            data-reg="${safeANS}" 
+                            aria-label="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}"
+                            title="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                         </svg>
                     </button>
-                    <div class="advertiser-main-info clickable-name" data-index="${startIdx + index}">
+                    <button class="advertiser-main-info clickable-name" 
+                            data-index="${startIdx + index}" 
+                            role="button" 
+                            aria-label="Ver detalhes da operadora ${safeName}">
                         <div class="advertiser-logo">
-                            <img src="${logoPath}" alt="${op.Nome_Fantasia || op.Razao_Social}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(op.Nome_Fantasia || op.Razao_Social)}&background=f74b4b&color=fff'">
+                            <img src="${logoPath}" alt="Logo ${safeName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(safeName)}&background=f74b4b&color=fff'">
                         </div>
                         <div class="advertiser-info">
                             <span class="advertiser-name">
-                                ${op.Nome_Fantasia || op.Razao_Social}
-                                <span class="cc-badge ${statusClass}">${op.Status_Operadora}</span>
+                                ${safeName}
+                                <span class="cc-badge ${statusClass}">${escapeHTML(op.Status_Operadora)}</span>
                             </span>
                             <span class="advertiser-stats">
-                                ANS: ${op.Registro_ANS}
+                                ANS: ${safeANS}
                             </span>
-                            ${!isAtiva && op.Motivo_do_Descredenciamento ? `<span class="advertiser-stats" style="color:var(--danger);font-size:0.68rem;">${op.Motivo_do_Descredenciamento}</span>` : ''}
+                            ${!isAtiva && safeMotivo ? `<span class="advertiser-stats" style="color:var(--danger);font-size:0.68rem;">${safeMotivo}</span>` : ''}
                         </div>
-                    </div>
+                    </button>
                 </div>
             </td>
             <td>
                 <div class="modalidade-cell">
-                    <span class="modalidade-badge">${op.Modalidade || "N/A"}</span>
+                    <span class="modalidade-badge">${safeModalidade}</span>
                 </div>
             </td>
             <td>
                 <div class="location-cell">
-                    <div class="location-city">${op.Cidade || "N/A"}</div>
-                    <div class="location-uf">${op.UF || ""}</div>
+                    <div class="location-city">${safeCidade}</div>
+                    <div class="location-uf">${safeUF}</div>
                 </div>
             </td>
             ${selectedBenefColumns.map(col => `
@@ -491,22 +504,33 @@ function openBuyModal(index) {
     openOperatorModal(op, beneficiaryData);
 }
 
-// ---- EVENT LISTENERS ----
+// ---- EVENT LISTE// ---- EVENT LISTENERS ----
 function initEventListeners() {
-    // Crypto tabs (Modalidades)
+    initTabEvents();
+    initFilterModalEvents();
+    initExportEvents();
+    initPaginationAndRowsEvents();
+    initSidebarEvents();
+    initOperatorModalEvents();
+    initGlobalSearchEvents();
+    initTableSortEvents();
+    initGlobalKeyAndClickEvents();
+    initColumnDropdownEvents();
+}
+
+function initTabEvents() {
     cryptoTabs.addEventListener("click", (e) => {
         const tab = e.target.closest(".crypto-tab");
         if (!tab) return;
-
         document.querySelectorAll(".crypto-tab").forEach(t => t.classList.remove("active"));
         tab.classList.add("active");
-
         currentModalidade = tab.dataset.modalidade;
         currentPage = 1;
         renderTable();
     });
+}
 
-    // ---- FILTER MODAL ----
+function initFilterModalEvents() {
     const filterBtn = document.getElementById("filterBtn");
     const filterModal = document.getElementById("filterModal");
     const filterModalClose = document.getElementById("filterModalClose");
@@ -516,44 +540,39 @@ function initEventListeners() {
     const filterStatusSelect = document.getElementById("filterStatus");
     const filterUFList = document.getElementById("filterUFList");
     const filterCityInput = document.getElementById("filterCity");
+    const filterModalityWrapper = document.getElementById('filterModalityWrapper');
+    const filterUFWrapper = document.getElementById('filterUFWrapper');
 
-    // Helper: set checkboxes from array
-    function syncCheckboxes(container, values) {
+    const syncCheckboxes = (container, values) => {
         container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
             cb.checked = values.includes(cb.value);
         });
-    }
-    // Helper: read checked values from container
-    function readCheckboxes(container) {
-        return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-    }
+    };
 
-    function updateTriggerText(wrapper, defaultText) {
+    const readCheckboxes = (container) => {
+        return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+    };
+
+    const updateTriggerText = (wrapper, defaultText) => {
         const trigger = wrapper.querySelector('.filter-dropdown-text');
         const count = wrapper.querySelectorAll('input[type="checkbox"]:checked').length;
         trigger.textContent = count > 0 ? `${count} selecionado${count > 1 ? 's' : ''}` : defaultText;
-    }
+    };
 
-    // ---- Fuzzy Search Logic ----
-    // Use the imported normalizeText from ./utils/search.js
-
-    function setupFuzzyFilter(inputId, listId) {
+    const setupFuzzyFilter = (inputId, listId) => {
         const input = document.getElementById(inputId);
         const list = document.getElementById(listId);
         if (!input || !list) return;
-
         input.addEventListener('input', (e) => {
             const searchTerm = normalizeText(e.target.value);
-            const items = list.querySelectorAll('.filter-checkbox-item');
-
-            items.forEach(item => {
+            list.querySelectorAll('.filter-checkbox-item').forEach(item => {
                 const text = normalizeText(item.textContent);
                 item.classList.toggle('hidden', searchTerm && !text.includes(searchTerm));
             });
         });
-    }
+    };
 
-    function resetFuzzyFilters() {
+    const resetFuzzyFilters = () => {
         ['searchModality', 'searchUF'].forEach(id => {
             const input = document.getElementById(id);
             if (input) {
@@ -561,33 +580,29 @@ function initEventListeners() {
                 input.dispatchEvent(new Event('input'));
             }
         });
-    }
+    };
 
     setupFuzzyFilter('searchModality', 'filterModalityList');
     setupFuzzyFilter('searchUF', 'filterUFList');
 
-    // Toggle dropdowns
-    const filterModalityWrapper = document.getElementById('filterModalityWrapper');
-    const filterUFWrapper = document.getElementById('filterUFWrapper');
-
     document.getElementById('filterModalityTrigger').addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         filterModalityWrapper.classList.toggle('open');
     });
+
     document.getElementById('filterUFTrigger').addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         filterUFWrapper.classList.toggle('open');
     });
 
-    // Update trigger text on checkbox change
-    filterModalityList.addEventListener('change', () => {
-        updateTriggerText(filterModalityWrapper, 'Todas as Modalidades');
-    });
-    filterUFList.addEventListener('change', () => {
-        updateTriggerText(filterUFWrapper, 'Todos os Estados');
-    });
+    filterModalityList.addEventListener('click', (e) => e.stopPropagation());
+    filterUFList.addEventListener('click', (e) => e.stopPropagation());
 
-    // Favorites toggle and clear
+    filterModalityList.addEventListener('change', () => updateTriggerText(filterModalityWrapper, 'Todas as Modalidades'));
+    filterUFList.addEventListener('change', () => updateTriggerText(filterUFWrapper, 'Todos os Estados'));
+
     const favFilterBtn = document.getElementById('favFilterBtn');
     const favClearBtn = document.getElementById('favClearBtn');
 
@@ -620,37 +635,32 @@ function initEventListeners() {
             filterStatusSelect.value = statusFilter;
             syncCheckboxes(filterUFList, filterUFs);
             filterCityInput.value = filterCity;
-            // Update trigger texts
             updateTriggerText(filterModalityWrapper, 'Todas as Modalidades');
             updateTriggerText(filterUFWrapper, 'Todos os Estados');
-            // Reset fuzzy search inputs
             resetFuzzyFilters();
-            // Close any open dropdowns
             filterModalityWrapper.classList.remove('open');
             filterUFWrapper.classList.remove('open');
             filterModal.classList.add("active");
+            filterBtn.setAttribute('aria-expanded', 'true');
         });
     }
 
     if (filterModalClose) {
-        filterModalClose.addEventListener("click", () => filterModal.classList.remove("active"));
+        filterModalClose.addEventListener("click", () => {
+            filterModal.classList.remove("active");
+            if (filterBtn) filterBtn.setAttribute('aria-expanded', 'false');
+        });
     }
 
     if (filterApply) {
         filterApply.addEventListener("click", () => {
             const selectedModalities = readCheckboxes(filterModalityList);
-            // If modalities are selected, set filterModalities; also sync currentModalidade
             filterModalities = selectedModalities;
-            if (selectedModalities.length === 1) {
-                currentModalidade = selectedModalities[0];
-            } else {
-                currentModalidade = "all";
-            }
+            currentModalidade = selectedModalities.length === 1 ? selectedModalities[0] : "all";
             statusFilter = filterStatusSelect.value;
             filterUFs = readCheckboxes(filterUFList);
             filterCity = filterCityInput.value;
 
-            // Sync tabs
             document.querySelectorAll(".crypto-tab").forEach(t => {
                 t.classList.toggle("active", t.dataset.modalidade === currentModalidade);
             });
@@ -658,6 +668,7 @@ function initEventListeners() {
             currentPage = 1;
             renderTable();
             filterModal.classList.remove("active");
+            if (filterBtn) filterBtn.setAttribute('aria-expanded', 'false');
         });
     }
 
@@ -668,33 +679,28 @@ function initEventListeners() {
             filterUFs = [];
             filterModalities = [];
             filterCity = "";
-
-            // Uncheck all filter checkboxes
             filterModalityList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             filterUFList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            // Reset trigger texts and close dropdowns
             updateTriggerText(filterModalityWrapper, 'Todas as Modalidades');
             updateTriggerText(filterUFWrapper, 'Todos os Estados');
             resetFuzzyFilters();
-            filterModalityWrapper.classList.remove('open');
-            filterUFWrapper.classList.remove('open');
-
-            // Sync tabs
-            document.querySelectorAll(".crypto-tab").forEach(t => {
-                t.classList.toggle("active", t.dataset.modalidade === "all");
-            });
-
+            document.querySelectorAll(".crypto-tab").forEach(t => t.classList.toggle("active", t.dataset.modalidade === "all"));
             currentPage = 1;
             renderTable();
             filterModal.classList.remove("active");
+            if (filterBtn) filterBtn.setAttribute('aria-expanded', 'false');
         });
     }
 
     filterModal.addEventListener("click", (e) => {
-        if (e.target === filterModal) filterModal.classList.remove("active");
+        if (e.target === filterModal) {
+            filterModal.classList.remove("active");
+            if (filterBtn) filterBtn.setAttribute('aria-expanded', 'false');
+        }
     });
+}
 
-    // ---- EXPORT CONTROLS ----
+function initExportEvents() {
     const exportWrapper = document.getElementById("exportWrapper");
     const exportBtn = document.getElementById("exportBtn");
     const exportCSV = document.getElementById("exportCSV");
@@ -704,16 +710,18 @@ function initEventListeners() {
     if (exportBtn) {
         exportBtn.addEventListener("click", (e) => {
             e.stopPropagation();
-            exportWrapper.classList.toggle("active");
+            const isActive = exportWrapper.classList.toggle("active");
             exportBtn.classList.toggle("active");
+            exportBtn.setAttribute('aria-expanded', isActive);
         });
     }
 
-    if (exportCSV) exportCSV.addEventListener("click", () => { exportToCSV(); exportWrapper.classList.remove("active"); exportBtn.classList.remove("active"); });
-    if (exportExcel) exportExcel.addEventListener("click", () => { exportToExcel(); exportWrapper.classList.remove("active"); exportBtn.classList.remove("active"); });
-    if (exportPDF) exportPDF.addEventListener("click", () => { exportToPDF(); exportWrapper.classList.remove("active"); exportBtn.classList.remove("active"); });
+    if (exportCSV) exportCSV.addEventListener("click", () => { exportToCSV(); exportWrapper.classList.remove("active"); exportBtn.classList.remove("active"); exportBtn.setAttribute('aria-expanded', 'false'); });
+    if (exportExcel) exportExcel.addEventListener("click", () => { exportToExcel(); exportWrapper.classList.remove("active"); exportBtn.classList.remove("active"); exportBtn.setAttribute('aria-expanded', 'false'); });
+    if (exportPDF) exportPDF.addEventListener("click", () => { exportToPDF(); exportWrapper.classList.remove("active"); exportBtn.classList.remove("active"); exportBtn.setAttribute('aria-expanded', 'false'); });
+}
 
-    // Pagination
+function initPaginationAndRowsEvents() {
     prevPageBtn.addEventListener("click", () => {
         if (currentPage > 1) {
             currentPage--;
@@ -729,39 +737,30 @@ function initEventListeners() {
         }
     });
 
-    // Rows per page
     const rowsSelect = document.getElementById("rowsSelect");
-    rowsSelect.addEventListener("click", (e) => {
-        e.stopPropagation();
-        rowsSelect.classList.toggle("open");
-    });
-
-    rowsSelect.querySelectorAll(".select-option").forEach(opt => {
-        opt.addEventListener("click", (e) => {
+    if (rowsSelect) {
+        rowsSelect.addEventListener("click", (e) => {
             e.stopPropagation();
-            rowsPerPage = parseInt(opt.dataset.value);
-            rowsValue.textContent = rowsPerPage;
-            rowsSelect.querySelectorAll(".select-option").forEach(o => o.classList.remove("active"));
-            opt.classList.add("active");
-            rowsSelect.classList.remove("open");
-            currentPage = 1;
-            renderTable();
+            rowsSelect.classList.toggle("open");
         });
-    });
 
-
-    // Close dropdowns on outside click
-    document.addEventListener("click", () => {
-        document.querySelectorAll(".rows-select.open, .export-wrapper.active").forEach(s => {
-            s.classList.remove("open", "active");
+        rowsSelect.querySelectorAll(".select-option").forEach(opt => {
+            opt.addEventListener("click", (e) => {
+                e.stopPropagation();
+                rowsPerPage = parseInt(opt.dataset.value);
+                rowsValue.textContent = rowsPerPage;
+                rowsSelect.querySelectorAll(".select-option").forEach(o => o.classList.remove("active"));
+                opt.classList.add("active");
+                rowsSelect.classList.remove("open");
+                currentPage = 1;
+                renderTable();
+            });
         });
-        if (exportBtn) exportBtn.classList.remove("active");
-    });
+    }
+}
 
-    // Sidebar toggle (mobile)
-    sidebarToggle.addEventListener("click", () => {
-        sidebar.classList.toggle("open");
-    });
+function initSidebarEvents() {
+    sidebarToggle.addEventListener("click", () => sidebar.classList.toggle("open"));
 
     document.addEventListener("click", (e) => {
         if (window.innerWidth <= 1024 && sidebar.classList.contains("open")) {
@@ -771,45 +770,26 @@ function initEventListeners() {
         }
     });
 
-    // Sidebar nav items
     document.querySelectorAll(".nav-item").forEach(item => {
         item.addEventListener("click", (e) => {
             const href = item.getAttribute("href");
-            if (href && href !== "#" && !href.startsWith("./#")) {
-                // Let the browser navigate naturally
-                return;
-            }
-
+            if (href && href !== "#" && !href.startsWith("./#")) return;
             e.preventDefault();
             document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
             item.classList.add("active");
-
-            const page = item.dataset.page;
             document.querySelector(".breadcrumb").textContent = item.querySelector("span").textContent;
-
-            if (page !== "Operadoras de Saúde") {
-                showToast(`Navigated to ${item.querySelector("span").textContent}`, "info");
-            }
-
-            if (window.innerWidth <= 1024) {
-                sidebar.classList.remove("open");
-            }
+            if (window.innerWidth <= 1024) sidebar.classList.remove("open");
         });
     });
+}
 
-    // Modal
+function initOperatorModalEvents() {
     document.getElementById("modalClose").addEventListener("click", closeBuyModal);
-    //document.getElementById("modalCancel").addEventListener("click", closeBuyModal);
-
     buyModal.addEventListener("click", (e) => {
         if (e.target === buyModal) closeBuyModal();
     });
+    document.getElementById("modalConfirm").addEventListener("click", closeBuyModal);
 
-    document.getElementById("modalConfirm").addEventListener("click", () => {
-        closeBuyModal();
-    });
-
-    // Modal Tabs
     document.querySelectorAll(".modal-tab").forEach(tab => {
         tab.addEventListener("click", () => {
             const target = tab.dataset.tab;
@@ -820,38 +800,44 @@ function initEventListeners() {
         });
     });
 
-    // Favorite Button
     document.getElementById("favoriteBtn").addEventListener("click", () => {
         if (!currentModalTrader) return;
         const isFav = store.toggleFavorite(currentModalTrader.Registro_ANS);
         const favBtn = document.getElementById("favoriteBtn");
         favBtn.classList.toggle("active", isFav);
         favBtn.title = isFav ? "Remover dos favoritos" : "Adicionar aos favoritos";
-
-        if (isFav) {
-            showToast(`${currentModalTrader.Nome_Fantasia || currentModalTrader.Razao_Social} adicionado aos favoritos ★`, "success");
-        } else {
-            showToast(`${currentModalTrader.Nome_Fantasia || currentModalTrader.Razao_Social} removido dos favoritos`, "info");
-        }
-
-        // Refresh table to reflect favorite change in background
+        showToast(`${currentModalTrader.Nome_Fantasia || currentModalTrader.Razao_Social} ${isFav ? 'adicionado aos' : 'removido dos'} favoritos`, isFav ? "success" : "info");
         renderTable();
         updateFavBtnState();
     });
+}
 
-    // Search
+function initGlobalSearchEvents() {
     searchInput.addEventListener("input", () => {
         currentPage = 1;
         renderTable();
     });
 
-    // Notification button
     document.getElementById("notifBtn").addEventListener("click", () => {
-        showToast("You have 3 unread notifications", "info");
+        showToast("Você tem 3 notificações não lidas", "info");
     });
+}
 
+function initTableSortEvents() {
+    document.querySelectorAll(".trade-table th.sortable").forEach(th => {
+        th.addEventListener("click", () => {
+            const newSortCol = th.getAttribute("data-sort");
+            sortAsc = (sortCol === newSortCol) ? !sortAsc : true;
+            sortCol = newSortCol;
+            document.querySelectorAll(".trade-table th.sortable").forEach(el => el.classList.remove("current-sort", "asc", "desc"));
+            th.classList.add("current-sort", sortAsc ? "asc" : "desc");
+            currentPage = 1;
+            renderTable();
+        });
+    });
+}
 
-    // ---- COLUMNS DROPDOWN ----
+function initColumnDropdownEvents() {
     const columnsWrapper = document.getElementById('columnsWrapper');
     const columnsBtn = document.getElementById('columnsBtn');
     const columnsDropdown = document.getElementById('columnsDropdown');
@@ -860,82 +846,64 @@ function initEventListeners() {
     if (columnsBtn && columnsDropdown) {
         columnsBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            columnsWrapper.classList.toggle('open');
+            const isOpen = columnsWrapper.classList.toggle('open');
+            columnsBtn.setAttribute('aria-expanded', isOpen);
         });
 
-        // Checkbox change
         columnsDropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => {
             cb.addEventListener('change', () => {
-                selectedBenefColumns = Array.from(
-                    columnsDropdown.querySelectorAll('input[type="checkbox"]:checked')
-                ).map(el => el.value);
+                selectedBenefColumns = Array.from(columnsDropdown.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
                 currentPage = 1;
                 renderTable();
             });
         });
 
-        // Clear button
         columnsClearBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            columnsDropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                cb.checked = false;
-            });
+            columnsDropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             selectedBenefColumns = [];
             currentPage = 1;
             renderTable();
         });
 
-        // Close on outside click
+        columnsDropdown.addEventListener('click', (e) => e.stopPropagation());
+
         document.addEventListener('click', (e) => {
             if (!columnsWrapper.contains(e.target)) {
                 columnsWrapper.classList.remove('open');
+                columnsBtn.setAttribute('aria-expanded', 'false');
             }
         });
     }
+}
 
-    // Keyboard shortcuts
+function initGlobalKeyAndClickEvents() {
+    document.addEventListener("click", () => {
+        document.querySelectorAll(".rows-select.open, .export-wrapper.active, .columns-wrapper.open").forEach(s => {
+            s.classList.remove("open", "active");
+        });
+        const exportBtn = document.getElementById("exportBtn");
+        if (exportBtn) {
+            exportBtn.classList.remove("active");
+            exportBtn.setAttribute('aria-expanded', 'false');
+        }
+        const columnsBtn = document.getElementById("columnsBtn");
+        if (columnsBtn) columnsBtn.setAttribute('aria-expanded', 'false');
+    });
+
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
             closeBuyModal();
-            document.querySelectorAll(".filter-select.open, .rows-select.open").forEach(s => s.classList.remove("open"));
-            if (exportWrapper) exportWrapper.classList.remove("active");
-            if (exportBtn) exportBtn.classList.remove("active");
-            if (columnsWrapper) columnsWrapper.classList.remove('open');
+            document.querySelectorAll(".filter-select.open, .rows-select.open, .export-wrapper.active, .columns-wrapper.open, .modal-overlay.active").forEach(s => s.classList.remove("open", "active"));
             if (window.innerWidth <= 1024) sidebar.classList.remove("open");
         }
-
         if ((e.ctrlKey || e.metaKey) && e.key === "k") {
             e.preventDefault();
             searchInput.focus();
         }
     });
 
-    // Theme toggle
     document.getElementById("themeToggle").addEventListener("click", toggleTheme);
-
-    // Table Sorting
-    document.querySelectorAll(".trade-table th.sortable").forEach(th => {
-        th.addEventListener("click", () => {
-            const newSortCol = th.getAttribute("data-sort");
-            if (sortCol === newSortCol) {
-                sortAsc = !sortAsc; // Toggle direction if same column
-            } else {
-                sortCol = newSortCol;
-                sortAsc = true; // Default to ascending for new column
-            }
-
-            // Update UI
-            document.querySelectorAll(".trade-table th.sortable").forEach(el => {
-                el.classList.remove("current-sort", "asc", "desc");
-            });
-            th.classList.add("current-sort");
-            th.classList.add(sortAsc ? "asc" : "desc");
-
-            // Re-render
-            currentPage = 1;
-            renderTable();
-        });
-    });
 }
 
 // ---- EXPORT FUNCTIONS ----
@@ -1003,7 +971,7 @@ function exportToPDF() {
 
     const html = `<!DOCTYPE html>
 <html><head>
-<title>Relatório de Operadoras - ${new Date().toLocaleDateString()}</title>
+<title>Relatório de Operadoras - ${escapeHTML(new Date().toLocaleDateString())}</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; color: #1e1b4b; }
@@ -1024,18 +992,30 @@ function exportToPDF() {
 </head><body>
     <div class="report-header">
         <h1>SaúdePortal — Relatório de Operadoras</h1>
-        <p>Gerado em ${new Date().toLocaleDateString()} às ${new Date().toLocaleTimeString()}</p>
+        <p>Gerado em ${escapeHTML(new Date().toLocaleDateString())} às ${escapeHTML(new Date().toLocaleTimeString())}</p>
     </div>
     <div class="kpi-grid">
         <div class="kpi-box"><div class="value">${data.length}</div><div class="label">Total no Filtro</div></div>
         <div class="kpi-box"><div class="value">${activeCount}</div><div class="label">Operadoras Ativas</div></div>
-        <div class="kpi-box"><div class="value">${currentModalidade}</div><div class="label">Modalidade</div></div>
+        <div class="kpi-box"><div class="value">${escapeHTML(currentModalidade)}</div><div class="label">Modalidade</div></div>
     </div>
     <table>
         <thead><tr>
             <th>Operadora (Fantasia)</th><th>ANS</th><th>CNPJ</th><th>Status</th><th>Modalidade</th><th>Localidade</th><th style="text-align:right">Beneficiários</th>
         </tr></thead>
-        <tbody>${tableRows}</tbody>
+        <tbody>
+            ${data.map(op => `
+                <tr>
+                    <td>${escapeHTML(op.Nome_Fantasia || op.Razao_Social)}</td>
+                    <td>${escapeHTML(op.Registro_ANS.toString())}</td>
+                    <td>${escapeHTML(op.CNPJ || '')}</td>
+                    <td>${escapeHTML(op.Status_Operadora)}</td>
+                    <td>${escapeHTML(op.Modalidade || '')}</td>
+                    <td>${escapeHTML(op.Cidade)} / ${escapeHTML(op.UF)}</td>
+                    <td style="text-align:right">${(op.qt_beneficiario_ativo || 0).toLocaleString('pt-BR')}</td>
+                </tr>
+            `).join("")}
+        </tbody>
     </table>
     <div class="footer">Dashboard de Operadoras ANS — Relatório Confidencial</div>
     <script>window.onload = () => { window.print(); }</script>

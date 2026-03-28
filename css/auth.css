@@ -1,0 +1,478 @@
+/* ============================================================
+   AUTH STYLES — Portal ANS / Finvest Dashboard
+   Reutiliza as CSS variables do styles.css
+   ============================================================ */
+
+/* ── Reset e Base ─────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --primary:        #f74b4b;
+  --primary-dark:   #d93c3c;
+  --primary-light:  #ff7e7e;
+  --success:        #10b981;
+  --danger:         #ef4444;
+  --warning:        #f59e0b;
+  --bg:             #f4f5f8;
+  --card-bg:        #ffffff;
+  --text:           #222638;
+  --text-secondary: #6b7280;
+  --text-muted:     #9ca3af;
+  --border:         #e2e4eb;
+  --sidebar-bg:     #262a3c;
+  --font-main:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius:         12px;
+  --radius-sm:      8px;
+  --shadow-lg:      0 10px 15px -3px rgba(0,0,0,.08), 0 4px 6px -4px rgba(0,0,0,.04);
+  --shadow-xl:      0 20px 25px -5px rgba(0,0,0,.10), 0 8px 10px -6px rgba(0,0,0,.05);
+  --transition:     0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── Fundo decorativo ─────────────────────────────────────── */
+.auth-bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(247,75,75,.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(124,58,237,.08) 0%, transparent 60%),
+    var(--bg);
+  z-index: 0;
+}
+
+/* ── Container principal ──────────────────────────────────── */
+.auth-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  padding: 24px 16px;
+}
+
+/* ── Card ─────────────────────────────────────────────────── */
+.auth-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border);
+  padding: 40px 36px;
+}
+
+@media (max-width: 480px) {
+  .auth-card { padding: 28px 20px; }
+}
+
+/* ── Logo / Header ────────────────────────────────────────── */
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.auth-logo-icon {
+  width: 38px;
+  height: 38px;
+  background: var(--primary);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.auth-logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-logo-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.auth-logo-sub {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+/* ── Título e subtítulo ───────────────────────────────────── */
+.auth-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+/* ── Formulário ───────────────────────────────────────────── */
+.auth-form { display: flex; flex-direction: column; gap: 18px; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+
+.form-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: .01em;
+}
+
+.form-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding: 11px 14px 11px 40px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-main);
+  font-size: 0.875rem;
+  color: var(--text);
+  background: var(--card-bg);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+}
+
+.form-input::placeholder { color: var(--text-muted); }
+
+.form-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(247,75,75,.12);
+}
+
+.form-input.error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(239,68,68,.10);
+}
+
+.form-input.success {
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px rgba(16,185,129,.10);
+}
+
+/* Ícone do input */
+.input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+/* Botão de mostrar/ocultar senha */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  transition: color var(--transition);
+}
+
+.toggle-password:hover { color: var(--text); }
+
+/* Input sem ícone (sem padding-left extra) */
+.form-input.no-icon { padding-left: 14px; }
+
+/* ── Mensagens de validação ───────────────────────────────── */
+.form-message {
+  font-size: 0.73rem;
+  min-height: 16px;
+  line-height: 1.4;
+}
+
+.form-message.error   { color: var(--danger); }
+.form-message.success { color: var(--success); }
+.form-message.hint    { color: var(--text-muted); }
+
+/* ── Indicador de força da senha ──────────────────────────── */
+.password-strength {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.strength-bars {
+  display: flex;
+  gap: 4px;
+}
+
+.strength-bar {
+  height: 3px;
+  flex: 1;
+  border-radius: 99px;
+  background: var(--border);
+  transition: background var(--transition);
+}
+
+.strength-bar.weak    { background: var(--danger); }
+.strength-bar.fair    { background: var(--warning); }
+.strength-bar.good    { background: #3b82f6; }
+.strength-bar.strong  { background: var(--success); }
+
+.strength-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+/* ── Links e extras ───────────────────────────────────────── */
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.form-link {
+  font-size: 0.78rem;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition);
+}
+
+.form-link:hover { color: var(--primary-dark); text-decoration: underline; }
+
+.form-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.form-checkbox-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* ── Botão principal ──────────────────────────────────────── */
+.btn-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-main);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  letter-spacing: .01em;
+}
+
+.btn-auth:hover:not(:disabled) {
+  background: var(--primary-dark);
+  box-shadow: 0 4px 12px rgba(247,75,75,.35);
+  transform: translateY(-1px);
+}
+
+.btn-auth:active:not(:disabled) { transform: translateY(0); }
+
+.btn-auth:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* Estado de loading no botão */
+.btn-auth .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Divider ──────────────────────────────────────────────── */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-divider span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* ── Botões sociais (OAuth) ───────────────────────────────── */
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-main);
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+}
+
+.btn-social:hover {
+  border-color: #c4c9d4;
+  background: #fafbfc;
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-social:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-social svg { flex-shrink: 0; }
+
+/* ── Alerta global ────────────────────────────────────────── */
+.auth-alert {
+  display: none;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  border: 1px solid;
+}
+
+.auth-alert.show { display: flex; }
+
+.auth-alert.error   { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+.auth-alert.success { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+.auth-alert.warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+.auth-alert.info    { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+
+.auth-alert svg { flex-shrink: 0; margin-top: 1px; }
+
+/* ── Rodapé do card ───────────────────────────────────────── */
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.79rem;
+  color: var(--text-secondary);
+}
+
+.auth-footer a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer a:hover { text-decoration: underline; }
+
+/* ── Rodapé da página ─────────────────────────────────────── */
+.page-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── Badge de plano ───────────────────────────────────────── */
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.plan-badge.free    { background: #f3f4f6; color: var(--text-secondary); }
+.plan-badge.premium { background: #fef3c7; color: #92400e; }
+.plan-badge.admin   { background: #fce7f3; color: #9d174d; }
+
+/* ── Tela de sucesso (email enviado, etc.) ────────────────── */
+.success-screen {
+  text-align: center;
+  padding: 12px 0;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  background: #f0fdf4;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: var(--success);
+}
+
+/* ── Animação de entrada ──────────────────────────────────── */
+.auth-card {
+  animation: fadeUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

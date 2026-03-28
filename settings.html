@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minha Conta — Portal ANS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .settings-wrapper {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .settings-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+
+    .settings-card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── Profile header ── */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .profile-avatar-lg {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .profile-avatar-lg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-header-info h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .profile-header-info .profile-email {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .plan-badge-lg {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .plan-badge-lg.free {
+      background: rgba(107,114,128,0.1);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .plan-badge-lg.premium {
+      background: rgba(245,158,11,0.1);
+      color: #d97706;
+      border: 1px solid rgba(245,158,11,0.25);
+    }
+
+    .plan-badge-lg.admin {
+      background: rgba(247,75,75,0.1);
+      color: var(--primary);
+      border: 1px solid rgba(247,75,75,0.25);
+    }
+
+    /* ── Form fields ── */
+    .settings-field {
+      margin-bottom: 18px;
+    }
+
+    .settings-field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .settings-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .settings-input:focus {
+      border-color: var(--primary);
+    }
+
+    .settings-input[readonly] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .settings-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+
+    .btn-settings-primary {
+      padding: 9px 20px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-settings-primary:hover { background: var(--primary-dark); }
+    .btn-settings-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-settings-ghost {
+      padding: 9px 20px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-settings-ghost:hover {
+      border-color: var(--text-secondary);
+      color: var(--text);
+    }
+
+    .save-feedback {
+      font-size: 0.8rem;
+      margin-top: 6px;
+      min-height: 18px;
+      text-align: right;
+    }
+
+    .save-feedback.success { color: #10b981; }
+    .save-feedback.error   { color: #ef4444; }
+
+    /* ── Plan cards ── */
+    .plan-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .plan-grid { grid-template-columns: 1fr; }
+      .settings-card { padding: 20px; }
+    }
+
+    .plan-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+
+    .plan-card.current {
+      border-color: var(--primary);
+    }
+
+    .plan-card-tag {
+      position: absolute;
+      top: -1px;
+      right: 14px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: var(--primary);
+      color: #fff;
+      padding: 2px 10px;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .plan-card-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .plan-card-price {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .plan-card-price strong {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .plan-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .plan-features li .feat-icon {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .feat-icon.ok   { color: #10b981; }
+    .feat-icon.lock { color: var(--text-muted); }
+
+    .btn-upgrade {
+      width: 100%;
+      padding: 10px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-upgrade:hover { background: var(--primary-dark); }
+
+    .btn-current-plan {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: default;
+      font-family: inherit;
+    }
+
+    /* ── Security ── */
+    .security-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .security-item:last-child { border-bottom: none; }
+
+    .security-item-info h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .security-item-info p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* ── Danger zone ── */
+    .btn-danger-ghost {
+      padding: 9px 20px;
+      background: transparent;
+      color: #ef4444;
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-danger-ghost:hover {
+      background: rgba(239,68,68,0.07);
+      border-color: #ef4444;
+    }
+
+    /* ── Upgrade modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.hidden { display: none; }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .modal-icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(245,158,11,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      color: #d97706;
+    }
+
+    .modal-box h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .modal-box p {
+      font-size: 0.87rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .modal-box .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-box .modal-actions button {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div id="sidebarContainer"></div>
+
+    <main class="main-content">
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Navigation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <span class="breadcrumb">Minha Conta</span>
+        </div>
+        <div class="top-bar-right">
+          <button class="theme-toggle" id="themeToggle" title="Alternar tema" aria-label="Toggle Dark Mode">
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="content-wrapper">
+        <div class="page-header" style="margin-bottom:24px">
+          <h1 style="font-size:1.5rem;font-weight:700;color:var(--text)">Minha Conta</h1>
+        </div>
+
+        <div class="settings-wrapper">
+
+          <!-- Perfil -->
+          <div class="settings-card">
+            <p class="settings-card-title">Perfil</p>
+
+            <div class="profile-header">
+              <div class="profile-avatar-lg" id="profileAvatar">?</div>
+              <div class="profile-header-info">
+                <h2 id="profileName">Carregando...</h2>
+                <p class="profile-email" id="profileEmail"></p>
+                <span class="plan-badge-lg free" id="profileBadge">Free</span>
+              </div>
+            </div>
+
+            <div class="settings-field">
+              <label for="fieldName">Nome completo</label>
+              <input type="text" id="fieldName" class="settings-input" placeholder="Seu nome" maxlength="80">
+            </div>
+
+            <div class="settings-field">
+              <label for="fieldEmail">E-mail</label>
+              <input type="text" id="fieldEmail" class="settings-input" readonly>
+            </div>
+
+            <div class="settings-actions">
+              <button class="btn-settings-primary" id="saveProfileBtn">Salvar alterações</button>
+            </div>
+            <p class="save-feedback" id="profileFeedback"></p>
+          </div>
+
+          <!-- Plano -->
+          <div class="settings-card">
+            <p class="settings-card-title">Plano</p>
+
+            <div class="plan-grid">
+              <!-- FREE -->
+              <div class="plan-card" id="planFreeCard">
+                <p class="plan-card-name">Free</p>
+                <p class="plan-card-price"><strong>R$ 0</strong> / mês</p>
+                <ul class="plan-features">
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Painel de operadoras</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Dados de beneficiários</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Comparativo básico</li>
+                  <li><svg class="feat-icon lock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span style="opacity:.5">Alertas regulatórios</span></li>
+                  <li><svg class="feat-icon lock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span style="opacity:.5">Exportação de relatórios</span></li>
+                </ul>
+                <button class="btn-current-plan" id="planFreeBtn">Plano atual</button>
+              </div>
+
+              <!-- PREMIUM -->
+              <div class="plan-card" id="planPremiumCard">
+                <p class="plan-card-name">Premium</p>
+                <p class="plan-card-price"><strong>R$ 49</strong> / mês</p>
+                <ul class="plan-features">
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Tudo do Free</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Alertas regulatórios</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Exportação de relatórios</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Simulador M&amp;A</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Calculadora atuarial</li>
+                </ul>
+                <button class="btn-upgrade" id="planUpgradeBtn">Fazer upgrade</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Segurança -->
+          <div class="settings-card">
+            <p class="settings-card-title">Segurança</p>
+
+            <div class="security-item">
+              <div class="security-item-info">
+                <h4>Senha</h4>
+                <p>Altere sua senha de acesso ao portal.</p>
+              </div>
+              <button class="btn-settings-ghost" id="changePasswordBtn">Alterar senha</button>
+            </div>
+
+            <div class="security-item">
+              <div class="security-item-info">
+                <h4>Sair da conta</h4>
+                <p>Encerra sua sessão neste dispositivo.</p>
+              </div>
+              <button class="btn-danger-ghost" id="logoutBtnPage">Sair</button>
+            </div>
+          </div>
+
+        </div><!-- /.settings-wrapper -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal de upgrade -->
+  <div class="modal-overlay hidden" id="upgradeModal">
+    <div class="modal-box">
+      <div class="modal-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <h3>Upgrade para Premium</h3>
+      <p>Acesso completo a alertas regulatórios, simulador M&A, calculadora atuarial e exportação de relatórios.</p>
+      <div class="modal-actions">
+        <button class="btn-settings-ghost" id="modalCloseBtn">Agora não</button>
+        <button class="btn-settings-primary" id="modalContactBtn">Entrar em contato</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/env.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/auth.js"></script>
+  <script type="module">
+    import { initSidebar } from './js/sidebar.js';
+    const AuthModule = window.AuthModule;
+
+    // ── Tema ──────────────────────────────────────────────────────
+    (function() {
+      const saved = localStorage.getItem('finvest-theme');
+      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      localStorage.setItem('finvest-theme', isDark ? 'light' : 'dark');
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+    // ── Carrega sidebar ───────────────────────────────────────────
+    async function loadSidebar() {
+      const res = await fetch('components/sidebar.html');
+      const html = await res.text();
+      document.getElementById('sidebarContainer').outerHTML = html;
+    }
+
+    // ── Preenche UI da página ─────────────────────────────────────
+    function populatePage(profile) {
+      const role = profile.role || 'FREE';
+      const name = profile.full_name || profile.email?.split('@')[0] || '';
+      const initials = name.split(' ').map(p => p[0]).filter(Boolean).join('').substring(0, 2).toUpperCase() || '?';
+
+      // Avatar grande
+      const avatarEl = document.getElementById('profileAvatar');
+      if (profile.avatar_url) {
+        avatarEl.innerHTML = `<img src="${profile.avatar_url}" alt="Avatar">`;
+      } else {
+        avatarEl.textContent = initials;
+      }
+
+      document.getElementById('profileName').textContent = name || 'Sem nome';
+      document.getElementById('profileEmail').textContent = profile.email || '';
+      document.getElementById('fieldName').value  = profile.full_name || '';
+      document.getElementById('fieldEmail').value = profile.email || '';
+
+      // Badge do plano
+      const badge = document.getElementById('profileBadge');
+      const roleLabels = { FREE: 'Plano Free', PREMIUM: 'Plano Premium', ADMIN: 'Admin' };
+      badge.textContent = roleLabels[role] || role;
+      badge.className = `plan-badge-lg ${role.toLowerCase()}`;
+
+      // Destaca plano atual nos cards
+      if (role === 'PREMIUM' || role === 'ADMIN') {
+        document.getElementById('planPremiumCard').classList.add('current');
+        document.getElementById('planPremiumCard').querySelector('.plan-card-tag') ||
+          (() => {
+            const tag = document.createElement('span');
+            tag.className = 'plan-card-tag';
+            tag.textContent = 'Atual';
+            document.getElementById('planPremiumCard').prepend(tag);
+          })();
+        document.getElementById('planUpgradeBtn').textContent = 'Plano atual';
+        document.getElementById('planUpgradeBtn').disabled = true;
+        document.getElementById('planUpgradeBtn').style.cssText = 'width:100%;padding:10px;background:transparent;color:var(--primary);border:2px solid var(--primary);border-radius:var(--radius-sm);font-size:.85rem;font-weight:600;cursor:default;font-family:inherit;';
+      } else {
+        document.getElementById('planFreeCard').classList.add('current');
+        const tag = document.createElement('span');
+        tag.className = 'plan-card-tag';
+        tag.textContent = 'Atual';
+        document.getElementById('planFreeCard').prepend(tag);
+      }
+    }
+
+    // ── Main ──────────────────────────────────────────────────────
+    (async () => {
+      const { supabase: sb } = AuthModule;
+
+      // Verifica sessão
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        window.location.replace('auth/login.html');
+        return;
+      }
+
+      // Carrega sidebar e dados em paralelo
+      const [, profileResult] = await Promise.all([
+        loadSidebar(),
+        AuthModule.getProfile(),
+      ]);
+
+      let profile = profileResult;
+
+      if (!profile) {
+        // Profile não existe ainda (trigger não rodou) — tenta criar
+        try {
+          await sb.from('profiles').upsert({
+            id:        session.user.id,
+            email:     session.user.email,
+            full_name: session.user.user_metadata?.full_name || null,
+            role:      'FREE',
+          }, { onConflict: 'id', ignoreDuplicates: true });
+          profile = await AuthModule.getProfile();
+        } catch (_) {}
+      }
+
+      if (!profile) {
+        // Fallback local — não redireciona, apenas exibe com dados mínimos
+        profile = {
+          id:        session.user.id,
+          email:     session.user.email,
+          full_name: session.user.user_metadata?.full_name || null,
+          role:      'FREE',
+        };
+      }
+
+      window.__authProfile = profile;
+
+      initSidebar();
+      populatePage(profile);
+
+      // ── Salvar perfil ──────────────────────────────────────────
+      document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+        const newName = document.getElementById('fieldName').value.trim();
+        const btn      = document.getElementById('saveProfileBtn');
+        const feedback = document.getElementById('profileFeedback');
+
+        btn.disabled = true;
+        btn.textContent = 'Salvando...';
+        feedback.textContent = '';
+        feedback.className = 'save-feedback';
+
+        try {
+          const { error } = await sb.from('profiles')
+            .update({ full_name: newName })
+            .eq('id', session.user.id);
+
+          if (error) throw error;
+
+          // Atualiza metadados do auth
+          await sb.auth.updateUser({ data: { full_name: newName } });
+
+          document.getElementById('profileName').textContent = newName || profile.email?.split('@')[0];
+          document.querySelector('[data-auth-name]').textContent = newName || profile.email?.split('@')[0];
+
+          feedback.textContent = 'Alterações salvas com sucesso.';
+          feedback.className   = 'save-feedback success';
+        } catch (err) {
+          feedback.textContent = 'Erro ao salvar. Tente novamente.';
+          feedback.className   = 'save-feedback error';
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Salvar alterações';
+          setTimeout(() => { feedback.textContent = ''; }, 4000);
+        }
+      });
+
+      // ── Alterar senha ──────────────────────────────────────────
+      document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('changePasswordBtn');
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+
+        try {
+          await sb.auth.resetPasswordForEmail(profile.email, {
+            redirectTo: `${window.location.origin}/auth/reset-password.html`,
+          });
+          btn.textContent = 'E-mail enviado!';
+          setTimeout(() => { btn.disabled = false; btn.textContent = 'Alterar senha'; }, 4000);
+        } catch {
+          btn.disabled = false;
+          btn.textContent = 'Alterar senha';
+        }
+      });
+
+      // ── Logout ─────────────────────────────────────────────────
+      document.getElementById('logoutBtnPage').addEventListener('click', async () => {
+        await AuthModule.logout('/auth/login.html');
+      });
+
+      // ── Modal upgrade ──────────────────────────────────────────
+      document.getElementById('planUpgradeBtn')?.addEventListener('click', () => {
+        if (!document.getElementById('planUpgradeBtn').disabled) {
+          document.getElementById('upgradeModal').classList.remove('hidden');
+        }
+      });
+
+      document.getElementById('modalCloseBtn').addEventListener('click', () => {
+        document.getElementById('upgradeModal').classList.add('hidden');
+      });
+
+      document.getElementById('modalContactBtn').addEventListener('click', () => {
+        window.location.href = 'help.html';
+      });
+
+      document.getElementById('upgradeModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('upgradeModal')) {
+          document.getElementById('upgradeModal').classList.add('hidden');
+        }
+      });
+
+    })();
+  </script>
+</body>
+</html>

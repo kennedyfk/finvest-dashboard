@@ -1,6 +1,6 @@
 import { initSidebar } from './sidebar.js?v=14';
 import { openOperatorModal } from './components/operator_modal.js?v=14';
-import { loadComponent, showToast, formatNumber } from './utils/ui.js?v=14';
+import { loadComponent, showToast, formatNumber, escapeHTML } from './utils/ui.js?v=14';
 import { smartSearch, normalizeText } from './utils/search.js?v=14';
 import { store } from './services/store.js?v=14';
 
@@ -168,11 +168,11 @@ function renderAlertsTable() {
                         </button>
                         <div class="advertiser-main-info" onclick="window.openDetail('${alert.ans}')">
                             <div class="advertiser-logo">
-                                <img src="${logoPath}" alt="${alert.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(alert.name)}&background=f74b4b&color=fff'">
+                                <img src="${logoPath}" alt="${escapeHTML(alert.name)}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(alert.name)}&background=f74b4b&color=fff'">
                             </div>
                             <div class="advertiser-info">
                             <span class="advertiser-name" style="font-weight:600; color:var(--text-main); font-size:0.9rem;">
-                                ${alert.name}
+                                ${escapeHTML(alert.name)}
                                 <span class="cc-badge ativa">Ativo</span>
                             </span>
                             <span class="advertiser-stats" style="color:var(--text-muted); font-size:0.75rem;">ANS: ${alert.ans}</span>

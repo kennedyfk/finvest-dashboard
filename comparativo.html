@@ -10,282 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .compare-header {
-            margin-bottom: 24px;
-        }
-
-        .compare-header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.02em;
-        }
-
-        .compare-header p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-top: 6px;
-        }
-
-        .compare-controls {
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            position: relative;
-        }
-
-        .compare-search-wrap {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .compare-search-input {
-            width: 100%;
-            padding: 12px 16px 12px 42px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            color: var(--text);
-            font-family: inherit;
-            font-size: 0.95rem;
-            transition: all var(--transition);
-        }
-
-        .compare-search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-        }
-
-        .compare-search-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            width: 18px;
-            height: 18px;
-        }
-
-        .autocomplete-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            width: 100%;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow-xl);
-            z-index: 1000;
-            max-height: 300px;
-            overflow-y: auto;
-            display: none;
-            flex-direction: column;
-            padding: 8px 0;
-        }
-
-        .autocomplete-dropdown.active {
-            display: flex;
-        }
-
-        .autocomplete-item {
-            padding: 10px 16px;
-            cursor: pointer;
-            transition: background var(--transition);
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .autocomplete-item:hover {
-            background: var(--bg);
-        }
-
-        .ac-name {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .ac-ans {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        /* Compare Grid */
-        .compare-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            align-items: flex-start;
-        }
-
-        /* Empty State */
-        .compare-empty {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 60px 20px;
-            background: var(--card-bg);
-            border: 1px dashed var(--border);
-            border-radius: var(--radius);
-            color: var(--text-muted);
-        }
-
-        .compare-empty svg {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        /* Compare Card */
-        .compare-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 16px;
-            box-shadow: var(--shadow-sm);
-            position: relative;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .cc-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .cc-avatar {
-            width: 72px;
-            height: 48px;
-            border-radius: 6px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #fff;
-            flex-shrink: 0;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .cc-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: #fff;
-            padding: 2px;
-        }
-
-        .cc-title-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-
-        .cc-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .cc-subtitle {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-
-        .cc-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            margin-top: 4px;
-            background: var(--bg);
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-            width: fit-content;
-        }
-
-        .cc-badge.ativa {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border-color: transparent;
-        }
-
-        .cc-metrics {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .cc-metric {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .cc-metric-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .cc-metric-value {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .cc-metric-sub {
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-        }
-
-        .cc-divider {
-            height: 1px;
-            background: var(--border-light);
-            margin: 4px 0;
-        }
-
-        /* Winner highlighting */
-        .winner {
-            color: var(--success);
-        }
-
-        .winner::after {
-            content: "🏆";
-            font-size: 0.9rem;
-            margin-left: 6px;
-        }
-    </style>
 </head>
 
 <body>
@@ -326,7 +50,7 @@
                 </div>
             </header>
 
-            <div class="content-wrapper" style="overflow-y: auto; height: 100%;">
+            <div class="content-wrapper">
 
                 <div class="compare-header">
                     <h1>Side-by-Side Benchmarking</h1>
@@ -335,23 +59,24 @@
 
                 <div class="compare-controls">
                     <div class="compare-search-wrap">
+                        <label for="compareInput" class="sr-only">Pesquisar operadoras para comparar</label>
                         <svg class="compare-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <circle cx="11" cy="11" r="8" />
                             <line x1="21" y1="21" x2="16.65" y2="16.65" />
                         </svg>
                         <input type="text" class="compare-search-input" id="compareInput"
-                            placeholder="Digite Razão Social ou Registro ANS..." autocomplete="off">
-                        <div class="autocomplete-dropdown" id="compareDropdown"></div>
+                            placeholder="Digite Razão Social ou Registro ANS..." autocomplete="off" role="combobox"
+                            aria-autocomplete="list" aria-expanded="false" aria-haspopup="listbox"
+                            aria-controls="compareDropdown">
+                        <div class="autocomplete-dropdown" id="compareDropdown" role="listbox"></div>
+                        <span class="compare-count" id="compareCountMsg">0/4 selecionadas</span>
+
                     </div>
-                    <span style="font-size: 0.8rem; color: var(--text-muted);" id="compareCountMsg">0/4
-                        selecionadas</span>
                 </div>
-                <div class="compare-selection-header"
-                    style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; min-height: 32px;">
-                    <button id="clearAllBtn" class="filter-btn"
-                        style="display: none; padding: 8px; color: var(--primary); border-color: var(--border); background: var(--card-bg); line-height: 0;"
-                        title="Limpar todas as seleções">
+
+                <div class="compare-tags-wrap">
+                    <button id="clearAllBtn" class="clear-selection-btn hidden" title="Limpar todas as seleções">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
                             height="16">
                             <polyline points="3 6 5 6 21 6"></polyline>
@@ -361,28 +86,23 @@
                             <line x1="14" y1="11" x2="14" y2="17"></line>
                         </svg>
                     </button>
-                    <div id="compareSelectedTags" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <div id="compareSelectedTags" class="compare-tags">
                         <!-- Tag buttons with JS -->
                     </div>
+
                 </div>
 
                 <div class="compare-grid" id="compareGrid">
                     <!-- Javascript renders cards here -->
                 </div>
 
-                <!-- Secao Grafica Avancada -->
-                <div class="charts-container" id="chartsContainer"
-                    style="display: none; margin-top: 40px; padding-bottom: 60px;">
-                    <div
-                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                <div class="charts-container" id="chartsContainer">
+                    <div class="charts-header">
                         <div>
-                            <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text);">Análise de Perfis
-                                (Radar & Escala)</h2>
-                            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top:4px;">Composição
-                                demográfica da carteira e volumetria de vidas</p>
+                            <h2>Análise de Perfis (Radar & Escala)</h2>
+                            <p>Composição demográfica da carteira e volumetria de vidas</p>
                         </div>
-                        <button class="btn btn-primary" onclick="window.print()"
-                            style="padding: 10px 16px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        <button class="export-pdf-btn" id="exportPDFBtn">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"
                                 height="16">
                                 <polyline points="6 9 6 2 18 2 18 9" />
@@ -395,11 +115,8 @@
 
                     <div class="charts-grid">
 
-                        <!-- Radar Chart -->
-                        <div class="chart-card radar-card"
-                            style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
-                            <h3 style="font-size: 1rem; color: var(--text); margin-bottom: 20px; text-align: center;">
-                                Raio-X: Perfil Demográfico</h3>
+                        <div class="chart-card radar-card">
+                            <h3>Raio-X: Perfil Demográfico</h3>
                             <div class="radar-content">
                                 <div class="radar-canvas-wrapper">
                                     <canvas id="radarChart"></canvas>
@@ -410,36 +127,27 @@
                             </div>
                         </div>
 
-                        <!-- Bar Chart -->
-                        <div class="chart-card"
-                            style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
-                            <h3 style="font-size: 1rem; color: var(--text); margin-bottom: 20px; text-align: center;">
-                                Evolução histórica de Vidas</h3>
-                            <div style="position: relative; height: 320px; width: 100%;">
+                        <div class="chart-card">
+                            <h3>Evolução histórica de Vidas</h3>
+                            <div class="chart-wrapper">
                                 <canvas id="barChart"></canvas>
                             </div>
                         </div>
 
-                        <!-- Doughnut Chart (Market Share) -->
-                        <div class="chart-card"
-                            style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
-                            <h3 style="font-size: 1rem; color: var(--text); margin-bottom: 20px; text-align: center;">
-                                Proporção da Carteira (Market Share)</h3>
+                        <div class="chart-card">
+                            <h3>Proporção da Carteira (Market Share)</h3>
                             <div class="radar-content stacked">
-                                <div class="radar-canvas-wrapper" style="height: 320px;">
+                                <div class="radar-canvas-wrapper">
                                     <canvas id="shareChart"></canvas>
                                 </div>
                                 <div id="shareTableContainer" class="radar-table-container"></div>
                             </div>
                         </div>
 
-                        <!-- Stacked Bar Chart (Faixa Etária) -->
-                        <div class="chart-card"
-                            style="background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-sm);">
-                            <h3 style="font-size: 1rem; color: var(--text); margin-bottom: 20px; text-align: center;">
-                                Composição (Faixa Etária)</h3>
+                        <div class="chart-card">
+                            <h3>Composição (Faixa Etária)</h3>
                             <div class="radar-content stacked">
-                                <div class="radar-canvas-wrapper" style="height: 320px;">
+                                <div class="radar-canvas-wrapper">
                                     <canvas id="ageChart"></canvas>
                                 </div>
                                 <div id="ageTableContainer" class="radar-table-container"></div>
@@ -457,6 +165,10 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Scripts -->
+    <script src="js/env.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/auth-guard.js" data-require-auth="true" data-require-role="FREE"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="js/comparativo.js"></script>
 </body>

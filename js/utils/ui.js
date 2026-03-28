@@ -73,3 +73,18 @@ export function formatCurrency(num) {
     if (num === undefined || num === null || isNaN(num)) return "R$ 0,00";
     return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+
+/**
+ * Escapes special HTML characters to prevent XSS.
+ * @param {*} str - Value to escape
+ * @returns {string} Safe HTML string
+ */
+export function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}

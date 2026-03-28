@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar Senha — Portal ANS</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/auth.css">
+</head>
+<body>
+  <div class="auth-bg"></div>
+
+  <div class="auth-container">
+    <div class="auth-card">
+
+      <div class="auth-logo">
+        <div class="auth-logo-icon">FD</div>
+        <div class="auth-logo-text">
+          <span class="auth-logo-name">Finvest Dashboard</span>
+          <span class="auth-logo-sub">Portal ANS · Dados de Saúde Suplementar</span>
+        </div>
+      </div>
+
+      <!-- Tela de sucesso (oculta inicialmente) -->
+      <div id="successScreen" class="success-screen" style="display:none">
+        <div class="success-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+          </svg>
+        </div>
+        <h2 class="auth-title">E-mail enviado!</h2>
+        <p class="auth-subtitle">
+          Se este e-mail estiver cadastrado, você receberá um link para redefinir sua senha.<br><br>
+          Verifique sua caixa de entrada e a pasta de spam. O link expira em <strong>1 hora</strong>.
+        </p>
+        <a href="login.html" class="btn-auth" style="text-decoration:none;margin-top:8px">
+          Voltar para o login
+        </a>
+      </div>
+
+      <!-- Formulário de recuperação -->
+      <div id="recoverWrapper">
+        <a href="login.html" class="form-link" style="font-size:.8rem;display:inline-flex;align-items:center;gap:4px;margin-bottom:16px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          Voltar para login
+        </a>
+
+        <h1 class="auth-title">Recuperar senha</h1>
+        <p class="auth-subtitle">
+          Informe o e-mail da sua conta. Você receberá um link para criar uma nova senha.
+        </p>
+
+        <div class="auth-alert" id="globalAlert" role="alert" aria-live="polite">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="globalAlertMsg"></span>
+        </div>
+
+        <form class="auth-form" id="recoverForm" novalidate>
+
+          <div class="form-group">
+            <label class="form-label" for="email">E-mail cadastrado</label>
+            <div class="form-input-wrapper">
+              <span class="input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+              </span>
+              <input
+                class="form-input"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="seu@email.com"
+                autocomplete="email"
+                required
+                maxlength="254"
+              >
+            </div>
+            <span class="form-message" id="emailMsg" aria-live="polite"></span>
+          </div>
+
+          <button type="submit" class="btn-auth" id="submitBtn">
+            <span id="btnText">Enviar link de recuperação</span>
+          </button>
+
+        </form>
+      </div>
+
+    </div><!-- /.auth-card -->
+  </div>
+
+  <script src="../js/env.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    const { supabase: sb } = AuthModule;
+
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText   = document.getElementById('btnText');
+
+    document.getElementById('recoverForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showAlert('', '');
+
+      const email = sanitizeInput(document.getElementById('email').value.trim());
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showAlert('Informe um e-mail válido.', 'error');
+        return;
+      }
+
+      setLoading(submitBtn, btnText, true);
+
+      try {
+        // Sempre respondemos com sucesso para não revelar se o e-mail existe
+        await sb.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/reset-password.html`
+        });
+
+        document.getElementById('recoverWrapper').style.display = 'none';
+        document.getElementById('successScreen').style.display  = 'block';
+
+      } catch (err) {
+        // Mesmo em caso de erro, mostramos mensagem genérica
+        document.getElementById('recoverWrapper').style.display = 'none';
+        document.getElementById('successScreen').style.display  = 'block';
+      } finally {
+        setLoading(submitBtn, btnText, false, 'Enviar link de recuperação');
+      }
+    });
+  </script>
+</body>
+</html>
