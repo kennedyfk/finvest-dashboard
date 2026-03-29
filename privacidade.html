@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidade — Portal ANS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            line-height: 1.6;
+        }
+
+        .privacy-page-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-xxl) var(--space-md);
+        }
+
+        .privacy-header {
+            margin-bottom: var(--space-xxl);
+            text-align: center;
+        }
+
+        .privacy-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: var(--space-sm);
+            letter-spacing: -0.02em;
+        }
+
+        .privacy-header .update-date {
+            color: var(--text-muted);
+            font-size: var(--font-sm);
+        }
+
+        .privacy-content {
+            background: var(--card-bg);
+            padding: var(--space-xxl);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .privacy-content h2 {
+            font-size: var(--font-xxl);
+            margin-top: var(--space-xl);
+            margin-bottom: var(--space-md);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .privacy-content p {
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+
+        .privacy-content ul {
+            margin-bottom: var(--space-lg);
+            padding-left: var(--space-xl);
+            color: var(--text-secondary);
+        }
+
+        .privacy-content li {
+            margin-bottom: var(--space-xs);
+        }
+
+        .back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: var(--font-md);
+            margin-bottom: var(--space-xl);
+            transition: var(--transition);
+        }
+
+        .back-home:hover {
+            color: var(--primary);
+            transform: translateX(-4px);
+        }
+
+        .contact-box {
+            background: rgba(var(--primary-rgb), 0.05);
+            border-left: 4px solid var(--primary);
+            padding: var(--space-lg);
+            margin-top: var(--space-xl);
+            border-radius: var(--radius-xs);
+        }
+
+        .contact-box h3 {
+            font-size: var(--font-lg);
+            color: var(--text);
+            margin-bottom: var(--space-xs);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: var(--space-xxl);
+            padding-bottom: var(--space-xxl);
+            color: var(--text-muted);
+            font-size: var(--font-sm);
+        }
+
+        @media (max-width: 600px) {
+            .privacy-content {
+                padding: var(--space-lg);
+            }
+            .privacy-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="privacy-page-wrapper">
+        <a href="index.html" class="back-home">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Voltar ao Dashboard
+        </a>
+
+        <header class="privacy-header">
+            <h1>Política de Privacidade</h1>
+            <p class="update-date">Última atualização: 29 de Março de 2026</p>
+        </header>
+
+        <article class="privacy-content">
+            <p>Seja bem-vindo ao <strong>Portal ANS (SaúdePortal)</strong>. A sua privacidade é uma prioridade para nós. Esta Política de Privacidade descreve como coletamos, usamos, processamos e protegemos as suas informações, em total conformidade com a <strong>Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD)</strong>.</p>
+
+            <h2>1. Coleta e Uso de Informações</h2>
+            <p>Nós coletamos informações que você nos fornece diretamente ao interagir com a plataforma, tais como:</p>
+            <ul>
+                <li><strong>Dados de Cadastro:</strong> Nome completo, endereço de e-mail e informações de perfil quando você cria uma conta.</li>
+                <li><strong>Dados de Acesso:</strong> Endereço IP, tipo de navegador, páginas visitadas e horários de acesso para fins de segurança e melhoria de UX.</li>
+                <li><strong>Dados de Uso:</strong> Registro de operadoras favoritadas e buscas realizadas para personalizar sua experiência.</li>
+            </ul>
+
+            <h2>2. Finalidade do Tratamento de Dados</h2>
+            <p>Os seus dados são utilizados para as seguintes finalidades:</p>
+            <ul>
+                <li>Prestar os serviços de análise de dados de saúde suplementar contratados.</li>
+                <li>Personalizar a sua interface e dashboard conforme suas preferências.</li>
+                <li>Garantir a segurança da sua conta e prevenir acessos não autorizados.</li>
+                <li>Enviar comunicações importantes sobre o sistema ou atualizações regulatórias relevantes.</li>
+            </ul>
+
+            <h2>3. Compartilhamento de Dados</h2>
+            <p>O SaúdePortal não comercializa seus dados pessoais para terceiros. O compartilhamento ocorre apenas em situações específicas:</p>
+            <ul>
+                <li><strong>Provedores de Infraestrutura:</strong> Serviços de nuvem (como Supabase/AWS) que processam dados sob nossa orientação.</li>
+                <li><strong>Cumprimento Legal:</strong> Quando exigido por ordem judicial ou autoridade competente.</li>
+            </ul>
+
+            <h2>4. Seus Direitos (Art. 18 LGPD)</h2>
+            <p>Você possui plenos direitos sobre seus dados, incluindo:</p>
+            <ul>
+                <li>Confirmar a existência do tratamento de dados.</li>
+                <li>Acessar seus dados pessoais a qualquer momento.</li>
+                <li>Corrigir dados incompletos ou inexatos através da página de Configurações.</li>
+                <li>Solicitar a exclusão definitiva dos seus dados de nossos servidores.</li>
+                <li>Revogar seu consentimento para o recebimento de e-mails informativos.</li>
+            </ul>
+
+            <h2>5. Cookies e Tecnologias Semelhantes</h2>
+            <p>Utilizamos cookies para manter sua sessão ativa e recordar suas preferências (como o Tema Escuro). Você pode gerenciar as configurações de cookies no seu navegador, mas isso poderá afetar algumas funcionalidades do dashboard.</p>
+
+            <h2>6. Segurança da Informação</h2>
+            <p>Adotamos medidas técnicas e administrativas avançadas para proteger seus dados contra acessos não autorizados, perda, destruição ou alteração.</p>
+
+            <div class="contact-box">
+                <h3>Dúvidas ou Requisições?</h3>
+                <p>Caso tenha qualquer dúvida sobre como tratamos seus dados ou deseje exercer seus direitos de titular, entre em contato com nosso encarregado de dados (DPO):</p>
+                <p><strong>E-mail:</strong> <a href="mailto:dpo@saudeportal.com.br" style="color: var(--primary); text-decoration: none;">dpo@saudeportal.com.br</a></p>
+            </div>
+        </article>
+
+        <footer>
+            &copy; 2026 SaúdePortal — Inteligência em Saúde Suplementar Brasileira.
+        </footer>
+    </div>
+
+    <script>
+        // Detecta tema dark do usuário
+        (function() {
+            const savedTheme = localStorage.getItem('finvest-theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+</body>
+</html>

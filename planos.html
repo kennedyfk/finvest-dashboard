@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planos — Portal ANS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ── Tokens extras ───────────────────────────────────────── */
+    :root {
+      --primary-glow: rgba(247,75,75,.15);
+    }
+
+    /* ── Scroll suave no main ────────────────────────────────── */
+    .main-content { overflow-y: auto; }
+
+    /* ── Hero ────────────────────────────────────────────────── */
+    .planos-hero {
+      text-align: center;
+      padding: 60px 24px 0;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary-glow);
+      color: var(--primary);
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+    }
+
+    .planos-hero h1 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -.03em;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .planos-hero h1 span { color: var(--primary); }
+
+    .planos-hero p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 32px;
+      line-height: 1.6;
+    }
+
+    /* ── Toggle faturamento ──────────────────────────────────── */
+    .billing-toggle {
+      display: inline-flex;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px;
+      margin-bottom: 48px;
+      position: relative;
+    }
+
+    .billing-option {
+      padding: 7px 20px;
+      border-radius: 999px;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all .2s;
+      user-select: none;
+      position: relative;
+    }
+
+    .billing-option.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(247,75,75,.35);
+    }
+
+    .save-badge {
+      position: absolute;
+      top: -10px;
+      right: -4px;
+      background: #22c55e;
+      color: #fff;
+      font-size: .6rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
+
+    /* ── Cards ───────────────────────────────────────────────── */
+    .cards-section { padding: 0 32px 64px; }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 960px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    .plan-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      position: relative;
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .plan-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0,0,0,.12);
+    }
+
+    .plan-card.featured {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow), 0 4px 20px rgba(0,0,0,.1);
+      transform: scale(1.02);
+    }
+
+    .plan-card.featured:hover { transform: scale(1.02) translateY(-3px); }
+
+    .popular-badge {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--primary);
+      color: #fff;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 3px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .plan-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      font-size: 1.2rem;
+    }
+
+    .plan-icon.free    { background: rgba(100,116,139,.12); }
+    .plan-icon.premium { background: var(--primary-glow); }
+    .plan-icon.teams   { background: rgba(139,92,246,.12); }
+
+    .plan-name {
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .plan-tagline {
+      font-size: .85rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.45;
+    }
+
+    .price-amount {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: -.04em;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .price-currency {
+      font-size: .95rem;
+      font-weight: 700;
+      vertical-align: super;
+      margin-right: 1px;
+    }
+
+    .price-period {
+      font-size: .78rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .price-annual {
+      font-size: .75rem;
+      color: #22c55e;
+      font-weight: 600;
+      margin-bottom: 20px;
+      min-height: 16px;
+    }
+
+    .plan-cta {
+      width: 100%;
+      padding: 11px;
+      border-radius: var(--radius-sm);
+      font-size: .875rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all .18s;
+      margin-bottom: 22px;
+      font-family: inherit;
+    }
+
+    .plan-cta.outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text);
+    }
+
+    .plan-cta.outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    .plan-cta.solid { background: var(--primary); color: #fff; }
+    .plan-cta.solid:hover { background: #d63636; }
+
+    .plan-cta.dark { background: var(--text); color: var(--bg); }
+    .plan-cta.dark:hover { opacity: .85; }
+
+    .plan-divider { height: 1px; background: var(--border); margin-bottom: 20px; }
+
+    .features-label {
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      font-size: .85rem;
+      color: var(--text);
+    }
+
+    .feat-ok   { color: #22c55e; flex-shrink: 0; margin-top: 1px; }
+    .feat-lock { color: var(--border); flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Prova social ────────────────────────────────────────── */
+    .social-proof {
+      text-align: center;
+      padding: 32px 24px 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    .social-proof p {
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    .logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .logo-pill {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 16px;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* ── Tabela comparativa ──────────────────────────────────── */
+    .compare-section { padding: 0 32px 64px; }
+
+    .compare-section h2 {
+      text-align: center;
+      font-size: clamp(1.3rem, 2.5vw, 1.9rem);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      color: var(--text);
+      margin-bottom: 36px;
+    }
+
+    .compare-table {
+      max-width: 960px;
+      margin: 0 auto;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .ct-head {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      background: var(--card-bg);
+      border-bottom: 1.5px solid var(--border);
+    }
+
+    .ct-head-cell {
+      padding: 16px 20px;
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--text-muted);
+    }
+
+    .ct-head-cell.hl { background: var(--primary-glow); color: var(--primary); }
+
+    .ct-group-label {
+      padding: 11px 20px;
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ct-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+      transition: background .13s;
+    }
+
+    .ct-row:last-child { border-bottom: none; }
+    .ct-row:hover { background: var(--card-bg); }
+
+    .ct-cell {
+      padding: 14px 20px;
+      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      color: var(--text);
+    }
+
+    .ct-cell.center { justify-content: center; }
+    .ct-cell.hl-col { background: rgba(247,75,75,.04); }
+
+    .c-yes { color: #22c55e; }
+    .c-no  { color: var(--border); }
+    .c-partial { font-size: .75rem; font-weight: 600; color: var(--text-muted); }
+
+    /* ── FAQ ─────────────────────────────────────────────────── */
+    .faq-section {
+      padding: 0 32px 64px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .faq-section h2 {
+      text-align: center;
+      font-size: clamp(1.3rem, 2.5vw, 1.9rem);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      color: var(--text);
+      margin-bottom: 32px;
+    }
+
+    .faq-item { border-bottom: 1px solid var(--border); }
+
+    .faq-q {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      font-size: .925rem;
+      font-weight: 600;
+      color: var(--text);
+      font-family: inherit;
+      gap: 14px;
+    }
+
+    .faq-q svg { flex-shrink: 0; transition: transform .2s; color: var(--text-muted); }
+    .faq-item.open .faq-q svg { transform: rotate(180deg); }
+
+    .faq-a {
+      display: none;
+      padding-bottom: 18px;
+      font-size: .875rem;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+
+    .faq-item.open .faq-a { display: block; }
+
+    /* ── CTA final ───────────────────────────────────────────── */
+    .cta-section {
+      text-align: center;
+      padding: 64px 24px;
+      background: var(--primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(255,255,255,.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-section h2 {
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 900;
+      letter-spacing: -.03em;
+      color: #fff;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .cta-section p {
+      color: rgba(255,255,255,.8);
+      font-size: .975rem;
+      margin-bottom: 28px;
+      position: relative;
+    }
+
+    .cta-btns {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .btn-cta-white {
+      background: #fff;
+      color: var(--primary);
+      padding: 12px 28px;
+      border-radius: 9px;
+      font-size: .9rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .btn-cta-white:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+
+    .btn-cta-outline {
+      background: transparent;
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 9px;
+      font-size: .9rem;
+      font-weight: 700;
+      border: 2px solid rgba(255,255,255,.45);
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn-cta-outline:hover { border-color: #fff; }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 860px) {
+      .cards-grid { grid-template-columns: 1fr; max-width: 400px; }
+      .plan-card.featured { transform: none; }
+      .plan-card.featured:hover { transform: translateY(-3px); }
+      .ct-head, .ct-row { grid-template-columns: 1.6fr 1fr 1fr; }
+      .ct-head-cell:last-child, .ct-cell:last-child { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .cards-section, .compare-section { padding-left: 16px; padding-right: 16px; }
+      .faq-section { padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+
+  <!-- Sidebar -->
+  <div id="sidebarContainer"></div>
+
+  <main class="main-content">
+    <!-- Top bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Navigation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <span class="breadcrumb">Planos</span>
+      </div>
+      <div class="top-bar-right">
+        <button class="theme-toggle" id="themeToggle" title="Alternar tema" aria-label="Toggle Dark Mode">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Hero ────────────────────────────────────────────── -->
+    <section class="planos-hero">
+      <div class="hero-badge">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Planos e preços
+      </div>
+      <h1>Tudo que você precisa para<br><span>analisar o mercado de saúde</span></h1>
+      <p>Do monitoramento básico de operadoras à inteligência regulatória avançada. Escolha o plano certo para o seu nível de análise.</p>
+      <div class="billing-toggle">
+        <div class="billing-option active" id="optMonthly" onclick="setBilling('monthly')">Mensal</div>
+        <div class="billing-option" id="optAnnual" onclick="setBilling('annual')">
+          Anual
+          <span class="save-badge">-20%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Cards ───────────────────────────────────────────── -->
+    <section class="cards-section">
+      <div class="cards-grid">
+
+        <!-- FREE -->
+        <div class="plan-card">
+          <div class="plan-icon free">🔍</div>
+          <div class="plan-name">Free</div>
+          <div class="plan-tagline">Para quem está começando a explorar o mercado de saúde suplementar.</div>
+          <div><span class="price-currency">R$</span><span class="price-amount">0</span></div>
+          <div class="price-period">para sempre</div>
+          <div class="price-annual">&nbsp;</div>
+          <button class="plan-cta outline" onclick="window.location.href='settings.html'">Plano atual</button>
+          <div class="plan-divider"></div>
+          <p class="features-label">O que está incluído</p>
+          <ul class="feature-list">
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Painel de operadoras ANS</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Dados de beneficiários</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Comparativo básico</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Até 50 operadoras por busca</li>
+            <li class="feature-item" style="opacity:.4"><svg class="feat-lock" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Alertas regulatórios</li>
+            <li class="feature-item" style="opacity:.4"><svg class="feat-lock" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Exportação de relatórios</li>
+          </ul>
+        </div>
+
+        <!-- PREMIUM -->
+        <div class="plan-card featured">
+          <div class="popular-badge">⭐ Mais popular</div>
+          <div class="plan-icon premium">⚡</div>
+          <div class="plan-name">Premium</div>
+          <div class="plan-tagline">Para analistas e consultores que precisam de inteligência completa.</div>
+          <div><span class="price-currency">R$</span><span class="price-amount" id="premiumPrice">149</span></div>
+          <div class="price-period" id="premiumPeriod">por mês, cobrado mensalmente</div>
+          <div class="price-annual" id="premiumAnnual">&nbsp;</div>
+          <button class="plan-cta solid" onclick="showUpgradeContact()">Assinar Premium</button>
+          <div class="plan-divider"></div>
+          <p class="features-label">Tudo do Free, mais</p>
+          <ul class="feature-list">
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Alertas regulatórios em tempo real</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Exportação PDF e Excel</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Simulador M&amp;A de operadoras</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Calculadora atuarial</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Análise geomarketing avançada</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Suporte prioritário</li>
+          </ul>
+        </div>
+
+        <!-- ENTERPRISE -->
+        <div class="plan-card">
+          <div class="plan-icon teams">🏢</div>
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-tagline">Para equipes e organizações que precisam de dados em escala.</div>
+          <div><span class="price-amount" style="font-size:1.8rem">Sob consulta</span></div>
+          <div class="price-period">&nbsp;</div>
+          <div class="price-annual">&nbsp;</div>
+          <button class="plan-cta dark" onclick="window.location.href='help.html'">Falar com a equipe</button>
+          <div class="plan-divider"></div>
+          <p class="features-label">Tudo do Premium, mais</p>
+          <ul class="feature-list">
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Múltiplos usuários e times</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>API de dados personalizada</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Relatórios white-label</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>SLA garantido e suporte dedicado</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Integração com BI próprio</li>
+            <li class="feature-item"><svg class="feat-ok" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Treinamento e onboarding</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Prova social ─────────────────────────────────────── -->
+    <div class="social-proof">
+      <p>Usado por profissionais de</p>
+      <div class="logos">
+        <div class="logo-pill">Consultoras de Saúde</div>
+        <div class="logo-pill">Corretoras</div>
+        <div class="logo-pill">Operadoras ANS</div>
+        <div class="logo-pill">Departamentos de RH</div>
+        <div class="logo-pill">Escritórios de Advocacia</div>
+      </div>
+    </div>
+
+    <!-- ── Tabela comparativa ───────────────────────────────── -->
+    <section class="compare-section">
+      <h2>Compare os planos</h2>
+      <div class="compare-table">
+        <div class="ct-head">
+          <div class="ct-head-cell">Funcionalidade</div>
+          <div class="ct-head-cell">Free</div>
+          <div class="ct-head-cell hl">Premium</div>
+          <div class="ct-head-cell">Enterprise</div>
+        </div>
+
+        <div class="ct-group-label">Painel de Operadoras</div>
+        <div class="ct-row">
+          <div class="ct-cell">Listagem de operadoras ANS</div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center hl-col"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Dados de beneficiários</div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center hl-col"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Busca e filtros avançados</div>
+          <div class="ct-cell center"><span class="c-partial">50/busca</span></div>
+          <div class="ct-cell center hl-col"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="ct-group-label">Análise e Relatórios</div>
+        <div class="ct-row">
+          <div class="ct-cell">Comparativo de operadoras</div>
+          <div class="ct-cell center"><span class="c-partial">Básico</span></div>
+          <div class="ct-cell center hl-col"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Exportação PDF / Excel</div>
+          <div class="ct-cell center"><svg class="c-no" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="ct-cell center hl-col"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Alertas regulatórios ANS</div>
+          <div class="ct-cell center"><svg class="c-no" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="ct-cell center hl-col"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="ct-group-label">Ferramentas Avançadas</div>
+        <div class="ct-row">
+          <div class="ct-cell">Simulador M&amp;A</div>
+          <div class="ct-cell center"><svg class="c-no" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="ct-cell center hl-col"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Calculadora atuarial</div>
+          <div class="ct-cell center"><svg class="c-no" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="ct-cell center hl-col"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">API de dados</div>
+          <div class="ct-cell center"><svg class="c-no" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="ct-cell center hl-col"><svg class="c-no" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+
+        <div class="ct-group-label">Suporte</div>
+        <div class="ct-row">
+          <div class="ct-cell">Central de ajuda</div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center hl-col"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Suporte por e-mail</div>
+          <div class="ct-cell center"><svg class="c-no" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="ct-cell center hl-col"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="ct-row">
+          <div class="ct-cell">Gerente de conta dedicado</div>
+          <div class="ct-cell center"><svg class="c-no" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="ct-cell center hl-col"><svg class="c-no" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="ct-cell center"><svg class="c-yes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FAQ ─────────────────────────────────────────────── -->
+    <section class="faq-section">
+      <h2>Perguntas frequentes</h2>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Posso mudar de plano a qualquer momento?<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="faq-a">Sim. Você pode fazer upgrade ou downgrade quando quiser. No upgrade, a cobrança é proporcional ao período restante do mês.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Os dados são atualizados com que frequência?<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="faq-a">Os dados de operadoras e beneficiários são sincronizados com o portal da ANS trimestralmente. Os alertas regulatórios (Premium) são atualizados em tempo real.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Existe um período de teste do plano Premium?<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="faq-a">Sim. Oferecemos 14 dias de acesso Premium gratuito após o cadastro, sem necessidade de cartão de crédito.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Como funciona o plano anual?<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="faq-a">No plano anual você paga 12 meses de uma vez com 20% de desconto. A cobrança é feita uma única vez e o acesso dura 12 meses.</div>
+      </div>
+    </section>
+
+    <!-- ── CTA final ────────────────────────────────────────── -->
+    <section class="cta-section">
+      <h2>Pronto para fazer upgrade?</h2>
+      <p>Acesso completo a todos os dados e ferramentas ANS.</p>
+      <div class="cta-btns">
+        <button class="btn-cta-white" onclick="showUpgradeContact()">Assinar Premium</button>
+        <button class="btn-cta-outline" onclick="window.location.href='help.html'">Falar com a equipe</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ── Scripts ──────────────────────────────────────────────── -->
+<script src="js/env.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/auth-guard.js" data-require-auth="true" data-require-role="FREE"></script>
+<script src="js/planos.js"></script>
+</body>
+</html>

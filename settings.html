@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -87,21 +88,21 @@
     }
 
     .plan-badge-lg.free {
-      background: rgba(107,114,128,0.1);
+      background: rgba(107, 114, 128, 0.1);
       color: var(--text-secondary);
       border: 1px solid var(--border);
     }
 
     .plan-badge-lg.premium {
-      background: rgba(245,158,11,0.1);
+      background: rgba(245, 158, 11, 0.1);
       color: #d97706;
-      border: 1px solid rgba(245,158,11,0.25);
+      border: 1px solid rgba(245, 158, 11, 0.25);
     }
 
     .plan-badge-lg.admin {
-      background: rgba(247,75,75,0.1);
+      background: rgba(247, 75, 75, 0.1);
       color: var(--primary);
-      border: 1px solid rgba(247,75,75,0.25);
+      border: 1px solid rgba(247, 75, 75, 0.25);
     }
 
     /* ── Form fields ── */
@@ -159,8 +160,14 @@
       font-family: inherit;
     }
 
-    .btn-settings-primary:hover { background: var(--primary-dark); }
-    .btn-settings-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-settings-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-settings-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
     .btn-settings-ghost {
       padding: 9px 20px;
@@ -187,8 +194,13 @@
       text-align: right;
     }
 
-    .save-feedback.success { color: #10b981; }
-    .save-feedback.error   { color: #ef4444; }
+    .save-feedback.success {
+      color: #10b981;
+    }
+
+    .save-feedback.error {
+      color: #ef4444;
+    }
 
     /* ── Plan cards ── */
     .plan-grid {
@@ -198,8 +210,13 @@
     }
 
     @media (max-width: 600px) {
-      .plan-grid { grid-template-columns: 1fr; }
-      .settings-card { padding: 20px; }
+      .plan-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-card {
+        padding: 20px;
+      }
     }
 
     .plan-card {
@@ -269,8 +286,13 @@
       margin-top: 1px;
     }
 
-    .feat-icon.ok   { color: #10b981; }
-    .feat-icon.lock { color: var(--text-muted); }
+    .feat-icon.ok {
+      color: #10b981;
+    }
+
+    .feat-icon.lock {
+      color: var(--text-muted);
+    }
 
     .btn-upgrade {
       width: 100%;
@@ -286,7 +308,9 @@
       font-family: inherit;
     }
 
-    .btn-upgrade:hover { background: var(--primary-dark); }
+    .btn-upgrade:hover {
+      background: var(--primary-dark);
+    }
 
     .btn-current-plan {
       width: 100%;
@@ -311,7 +335,9 @@
       border-bottom: 1px solid var(--border-light);
     }
 
-    .security-item:last-child { border-bottom: none; }
+    .security-item:last-child {
+      border-bottom: none;
+    }
 
     .security-item-info h4 {
       font-size: 0.9rem;
@@ -330,7 +356,7 @@
       padding: 9px 20px;
       background: transparent;
       color: #ef4444;
-      border: 1px solid rgba(239,68,68,0.3);
+      border: 1px solid rgba(239, 68, 68, 0.3);
       border-radius: var(--radius-sm);
       font-size: 0.85rem;
       font-weight: 600;
@@ -340,7 +366,7 @@
     }
 
     .btn-danger-ghost:hover {
-      background: rgba(239,68,68,0.07);
+      background: rgba(239, 68, 68, 0.07);
       border-color: #ef4444;
     }
 
@@ -348,7 +374,7 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       z-index: 1000;
       display: flex;
       align-items: center;
@@ -356,7 +382,9 @@
       padding: 16px;
     }
 
-    .modal-overlay.hidden { display: none; }
+    .modal-overlay.hidden {
+      display: none;
+    }
 
     .modal-box {
       background: var(--card-bg);
@@ -371,7 +399,7 @@
     .modal-icon {
       width: 56px;
       height: 56px;
-      background: rgba(245,158,11,0.1);
+      background: rgba(245, 158, 11, 0.1);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -404,6 +432,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="app-container">
     <div id="sidebarContainer"></div>
@@ -413,28 +442,30 @@
         <div class="top-bar-left">
           <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Navigation">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22">
-              <line x1="3" y1="12" x2="21" y2="12"/>
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <line x1="3" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
             </svg>
           </button>
           <span class="breadcrumb">Minha Conta</span>
         </div>
         <div class="top-bar-right">
           <button class="theme-toggle" id="themeToggle" title="Alternar tema" aria-label="Toggle Dark Mode">
-            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"
+              height="18">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
             </svg>
-            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-              <circle cx="12" cy="12" r="5"/>
-              <line x1="12" y1="1" x2="12" y2="3"/>
-              <line x1="12" y1="21" x2="12" y2="23"/>
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-              <line x1="1" y1="12" x2="3" y2="12"/>
-              <line x1="21" y1="12" x2="23" y2="12"/>
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"
+              height="18">
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
             </svg>
           </button>
         </div>
@@ -470,6 +501,14 @@
               <input type="text" id="fieldEmail" class="settings-input" readonly>
             </div>
 
+            <div class="security-item">
+              <div class="security-item-info">
+                <h4>Senha</h4>
+                <p>Altere sua senha de acesso ao portal.</p>
+              </div>
+              <button class="btn-settings-ghost" id="changePasswordBtn">Alterar senha</button>
+            </div>
+
             <div class="settings-actions">
               <button class="btn-settings-primary" id="saveProfileBtn">Salvar alterações</button>
             </div>
@@ -486,25 +525,57 @@
                 <p class="plan-card-name">Free</p>
                 <p class="plan-card-price"><strong>R$ 0</strong> / mês</p>
                 <ul class="plan-features">
-                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Painel de operadoras</li>
-                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Dados de beneficiários</li>
-                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Comparativo básico</li>
-                  <li><svg class="feat-icon lock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span style="opacity:.5">Alertas regulatórios</span></li>
-                  <li><svg class="feat-icon lock" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span style="opacity:.5">Exportação de relatórios</span></li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>Painel de operadoras</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>Dados de beneficiários</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>Comparativo básico</li>
+                  <li><svg class="feat-icon lock" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg><span style="opacity:.5">Alertas regulatórios em tempo real</span></li>
+                  <li><svg class="feat-icon lock" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg><span style="opacity:.5">Exportação PDF e Excel</span></li>
                 </ul>
                 <button class="btn-current-plan" id="planFreeBtn">Plano atual</button>
               </div>
 
               <!-- PREMIUM -->
               <div class="plan-card" id="planPremiumCard">
-                <p class="plan-card-name">Premium</p>
-                <p class="plan-card-price"><strong>R$ 49</strong> / mês</p>
+                <p class="plan-card-name">Pro</p>
+                <p class="plan-card-price"><strong>R$ 149</strong> / mês</p>
                 <ul class="plan-features">
-                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Tudo do Free</li>
-                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Alertas regulatórios</li>
-                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Exportação de relatórios</li>
-                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Simulador M&amp;A</li>
-                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Calculadora atuarial</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>Tudo do Free</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>Alertas regulatórios em tempo real</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>Exportação PDF e Excel</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>Simulador M&amp;A de operadoras</li>
+                  <li><svg class="feat-icon ok" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>Calculadora atuarial</li>
                 </ul>
                 <button class="btn-upgrade" id="planUpgradeBtn">Fazer upgrade</button>
               </div>
@@ -513,16 +584,6 @@
 
           <!-- Segurança -->
           <div class="settings-card">
-            <p class="settings-card-title">Segurança</p>
-
-            <div class="security-item">
-              <div class="security-item-info">
-                <h4>Senha</h4>
-                <p>Altere sua senha de acesso ao portal.</p>
-              </div>
-              <button class="btn-settings-ghost" id="changePasswordBtn">Alterar senha</button>
-            </div>
-
             <div class="security-item">
               <div class="security-item-info">
                 <h4>Sair da conta</h4>
@@ -542,7 +603,8 @@
     <div class="modal-box">
       <div class="modal-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          <polygon
+            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       </div>
       <h3>Upgrade para Premium</h3>
@@ -564,7 +626,7 @@
     const AuthModule = window.AuthModule;
 
     // ── Tema ──────────────────────────────────────────────────────
-    (function() {
+    (function () {
       const saved = localStorage.getItem('finvest-theme');
       if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.setAttribute('data-theme', 'dark');
@@ -602,7 +664,7 @@
 
       document.getElementById('profileName').textContent = name || 'Sem nome';
       document.getElementById('profileEmail').textContent = profile.email || '';
-      document.getElementById('fieldName').value  = profile.full_name || '';
+      document.getElementById('fieldName').value = profile.full_name || '';
       document.getElementById('fieldEmail').value = profile.email || '';
 
       // Badge do plano
@@ -656,22 +718,22 @@
         // Profile não existe ainda (trigger não rodou) — tenta criar
         try {
           await sb.from('profiles').upsert({
-            id:        session.user.id,
-            email:     session.user.email,
+            id: session.user.id,
+            email: session.user.email,
             full_name: session.user.user_metadata?.full_name || null,
-            role:      'FREE',
+            role: 'FREE',
           }, { onConflict: 'id', ignoreDuplicates: true });
           profile = await AuthModule.getProfile();
-        } catch (_) {}
+        } catch (_) { }
       }
 
       if (!profile) {
         // Fallback local — não redireciona, apenas exibe com dados mínimos
         profile = {
-          id:        session.user.id,
-          email:     session.user.email,
+          id: session.user.id,
+          email: session.user.email,
           full_name: session.user.user_metadata?.full_name || null,
-          role:      'FREE',
+          role: 'FREE',
         };
       }
 
@@ -683,7 +745,7 @@
       // ── Salvar perfil ──────────────────────────────────────────
       document.getElementById('saveProfileBtn').addEventListener('click', async () => {
         const newName = document.getElementById('fieldName').value.trim();
-        const btn      = document.getElementById('saveProfileBtn');
+        const btn = document.getElementById('saveProfileBtn');
         const feedback = document.getElementById('profileFeedback');
 
         btn.disabled = true;
@@ -705,10 +767,10 @@
           document.querySelector('[data-auth-name]').textContent = newName || profile.email?.split('@')[0];
 
           feedback.textContent = 'Alterações salvas com sucesso.';
-          feedback.className   = 'save-feedback success';
+          feedback.className = 'save-feedback success';
         } catch (err) {
           feedback.textContent = 'Erro ao salvar. Tente novamente.';
-          feedback.className   = 'save-feedback error';
+          feedback.className = 'save-feedback error';
         } finally {
           btn.disabled = false;
           btn.textContent = 'Salvar alterações';
@@ -763,4 +825,5 @@
     })();
   </script>
 </body>
+
 </html>

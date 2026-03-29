@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Restrito — Portal ANS</title>
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/auth.css">
+    <style>
+        .unauth-icon {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: rgba(239,68,68,.1); display: flex; align-items: center;
+            justify-content: center; margin: 0 auto 20px; color: #ef4444;
+        }
+        .unauth-role-info {
+            background: var(--bg, #f4f5f8); border: 1px solid var(--border, #e2e4eb);
+            border-radius: 8px; padding: 12px 16px; margin: 18px 0;
+            font-size: 0.82rem; color: var(--text-secondary, #6b7280);
+        }
+        .unauth-role-info strong { color: var(--text, #222638); }
+        .role-chip {
+            display: inline-block; padding: 2px 10px; border-radius: 12px;
+            font-size: 0.72rem; font-weight: 700; margin-left: 4px;
+        }
+        .role-chip.free    { background: rgba(107,114,128,.12); color: #6b7280; }
+        .role-chip.premium { background: rgba(124,58,237,.12); color: #7c3aed; }
+        .role-chip.admin   { background: rgba(247,75,75,.12); color: #f74b4b; }
+
+        .unauth-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+        .btn-upgrade {
+            width: 100%; padding: 12px; background: var(--primary, #f74b4b);
+            color: #fff; border: none; border-radius: 8px; font-size: 0.9rem;
+            font-weight: 600; cursor: pointer; font-family: inherit;
+            transition: background .2s; text-decoration: none;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-upgrade:hover { background: #d93c3c; }
+        .btn-back {
+            width: 100%; padding: 12px; background: transparent;
+            color: var(--text-secondary, #6b7280); border: 1px solid var(--border, #e2e4eb);
+            border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+            cursor: pointer; font-family: inherit; transition: all .2s;
+            text-decoration: none; display: flex; align-items: center;
+            justify-content: center; gap: 8px;
+        }
+        .btn-back:hover { border-color: var(--text-muted, #9ca3af); color: var(--text, #222638); }
+
+        [data-theme="dark"] .unauth-role-info { background: #202434; border-color: #333a52; }
+        [data-theme="dark"] .btn-back { border-color: #333a52; color: #94a3b8; }
+        [data-theme="dark"] .btn-back:hover { color: #e2e8f0; border-color: #64748b; }
+    </style>
+</head>
+<body>
+    <div class="auth-bg"></div>
+
+    <div class="auth-container">
+        <div class="auth-card">
+
+            <div class="unauth-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+            </div>
+
+            <div class="auth-logo" style="justify-content:center;">
+                <div class="auth-logo-icon">FD</div>
+                <div class="auth-logo-text">
+                    <span class="auth-logo-name">Finvest Dashboard</span>
+                    <span class="auth-logo-sub">Portal ANS · Dados de Saúde Suplementar</span>
+                </div>
+            </div>
+
+            <h1 class="auth-title" style="margin-top:16px;">Acesso Restrito</h1>
+            <p class="auth-subtitle" id="unauthSubtitle">Este recurso não está disponível no seu plano atual.</p>
+
+            <div class="unauth-role-info" id="roleInfo" style="display:none;">
+                Seu plano: <strong id="currentRoleLabel">—</strong>
+                <span class="role-chip free" id="currentRoleChip">FREE</span>
+                &nbsp;·&nbsp;
+                Necessário: <strong id="requiredRoleLabel">—</strong>
+                <span class="role-chip premium" id="requiredRoleChip">PREMIUM</span>
+            </div>
+
+            <div class="unauth-actions">
+                <a href="../settings.html" class="btn-upgrade">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Ver planos Premium
+                </a>
+                <a href="../index.html" class="btn-back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+                        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+                    </svg>
+                    Voltar ao painel
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const saved = localStorage.getItem('finvest-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const role     = (params.get('role')     || 'FREE').toUpperCase();
+            const required = (params.get('required') || 'PREMIUM').toUpperCase();
+
+            const labels = { FREE: 'Gratuito', PREMIUM: 'Premium', ADMIN: 'Admin' };
+
+            if (role || required) {
+                document.getElementById('roleInfo').style.display = 'block';
+                document.getElementById('currentRoleLabel').textContent  = labels[role]     || role;
+                document.getElementById('requiredRoleLabel').textContent = labels[required] || required;
+
+                const currentChip  = document.getElementById('currentRoleChip');
+                const requiredChip = document.getElementById('requiredRoleChip');
+                currentChip.textContent  = role;
+                requiredChip.textContent = required;
+                currentChip.className    = 'role-chip ' + role.toLowerCase();
+                requiredChip.className   = 'role-chip ' + required.toLowerCase();
+            }
+
+            const subtitle = document.getElementById('unauthSubtitle');
+            if (required === 'ADMIN') {
+                subtitle.textContent = 'Este recurso é exclusivo para administradores da plataforma.';
+            } else {
+                subtitle.textContent = 'Faça upgrade para o plano Premium e desbloqueie todos os recursos.';
+            }
+        })();
+    </script>
+</body>
+</html>

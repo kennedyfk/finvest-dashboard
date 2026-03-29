@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termos de Uso — SaúdePortal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f4f5f8; --card-bg: #fff; --text: #222638;
+            --text-secondary: #4b5563; --text-muted: #9ca3af;
+            --border: #e2e4eb; --primary: #f74b4b;
+            --font: 'Inter', -apple-system, sans-serif;
+        }
+        [data-theme="dark"] {
+            --bg: #151824; --card-bg: #202434; --text: #e2e8f0;
+            --text-secondary: #94a3b8; --text-muted: #64748b; --border: #333a52;
+        }
+
+        body { font-family: var(--font); background: var(--bg); color: var(--text); transition: background .2s, color .2s; }
+
+        .doc-header {
+            background: var(--card-bg); border-bottom: 1px solid var(--border);
+            padding: 14px 0; position: sticky; top: 0; z-index: 100;
+        }
+        .doc-header-inner {
+            max-width: 760px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .doc-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+        .doc-logo-icon { width: 30px; height: 30px; background: var(--primary); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800; color: #fff; }
+        .doc-logo-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+        .doc-header-actions { display: flex; align-items: center; gap: 10px; }
+        .btn-back-link { display: inline-flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--text-muted); text-decoration: none; transition: color .2s; }
+        .btn-back-link:hover { color: var(--primary); }
+        .theme-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: all .2s; }
+        .theme-btn:hover { color: var(--text); }
+        .icon-sun { display: none; }
+        [data-theme="dark"] .icon-moon { display: none; }
+        [data-theme="dark"] .icon-sun  { display: block; }
+
+        .doc-body { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .doc-title { font-size: 1.9rem; font-weight: 800; color: var(--text); letter-spacing: -0.03em; margin-bottom: 6px; }
+        .doc-meta { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 36px; }
+
+        .doc-toc {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 10px; padding: 18px 22px; margin-bottom: 40px;
+        }
+        .doc-toc-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 10px; }
+        .doc-toc ol { padding-left: 18px; }
+        .doc-toc li { margin-bottom: 5px; }
+        .doc-toc a { font-size: 0.83rem; color: var(--text-secondary); text-decoration: none; transition: color .2s; }
+        .doc-toc a:hover { color: var(--primary); }
+
+        .doc-section { margin-bottom: 36px; }
+        .doc-section h2 { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 12px; padding-top: 8px; }
+        .doc-section p, .doc-section li { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.75; margin-bottom: 10px; }
+        .doc-section ul, .doc-section ol { padding-left: 20px; }
+        .doc-section li { margin-bottom: 6px; }
+        .doc-section a { color: var(--primary); }
+        .doc-section strong { color: var(--text); font-weight: 600; }
+
+        .doc-divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+        .doc-footer { text-align: center; font-size: 0.78rem; color: var(--text-muted); padding-top: 24px; border-top: 1px solid var(--border); }
+        .doc-footer a { color: var(--primary); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <header class="doc-header">
+        <div class="doc-header-inner">
+            <a href="index.html" class="doc-logo">
+                <div class="doc-logo-icon">FD</div>
+                <span class="doc-logo-name">SaúdePortal</span>
+            </a>
+            <div class="doc-header-actions">
+                <a href="javascript:history.back()" class="btn-back-link">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Voltar
+                </a>
+                <button class="theme-btn" id="themeToggle" aria-label="Alternar tema">
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="doc-body">
+        <h1 class="doc-title">Termos de Uso</h1>
+        <p class="doc-meta">Última atualização: 28 de março de 2026 &nbsp;·&nbsp; Versão 1.0</p>
+
+        <div class="doc-toc">
+            <div class="doc-toc-title">Sumário</div>
+            <ol>
+                <li><a href="#aceitacao">Aceitação dos Termos</a></li>
+                <li><a href="#servico">Descrição do Serviço</a></li>
+                <li><a href="#conta">Cadastro e Conta de Usuário</a></li>
+                <li><a href="#planos">Planos Free e Premium</a></li>
+                <li><a href="#dados-ans">Uso dos Dados ANS</a></li>
+                <li><a href="#limitacoes">Limitações de Responsabilidade</a></li>
+                <li><a href="#propriedade">Propriedade Intelectual</a></li>
+                <li><a href="#rescisao">Rescisão e Cancelamento</a></li>
+                <li><a href="#lei">Lei Aplicável</a></li>
+                <li><a href="#contato">Contato</a></li>
+            </ol>
+        </div>
+
+        <div class="doc-section" id="aceitacao">
+            <h2>1. Aceitação dos Termos</h2>
+            <p>Ao acessar ou utilizar a plataforma SaúdePortal ("Plataforma"), você concorda em ficar vinculado a estes Termos de Uso ("Termos"). Se você não concordar com alguma disposição destes Termos, não utilize a Plataforma.</p>
+            <p>Estes Termos constituem um acordo legal entre você ("Usuário") e o SaúdePortal. O uso continuado da Plataforma após a publicação de alterações constitui aceitação das novas condições.</p>
+        </div>
+        <hr class="doc-divider">
+
+        <div class="doc-section" id="servico">
+            <h2>2. Descrição do Serviço</h2>
+            <p>O SaúdePortal é uma plataforma analítica de inteligência de dados do setor de saúde suplementar brasileiro. A Plataforma oferece:</p>
+            <ul>
+                <li>Visualização e análise de dados públicos de operadoras de saúde disponibilizados pela ANS;</li>
+                <li>Ferramentas de comparativo, geomarketing, histórico financeiro e simulação M&A;</li>
+                <li>Calculadora atuarial com indicadores de risco demográfico;</li>
+                <li>Gerador de alertas regulatórios e relatórios personalizados.</li>
+            </ul>
+            <p>A Plataforma é fornecida "no estado em que se encontra" e pode ser modificada, suspensa ou descontinuada a qualquer momento, com ou sem aviso prévio.</p>
+        </div>
+        <hr class="doc-divider">
+
+        <div class="doc-section" id="conta">
+            <h2>3. Cadastro e Conta de Usuário</h2>
+            <p>Para acessar as funcionalidades da Plataforma, é necessário criar uma conta. Ao se cadastrar, você concorda em:</p>
+            <ul>
+                <li>Fornecer informações verdadeiras, precisas e atualizadas;</li>
+                <li>Manter a confidencialidade de sua senha e credenciais de acesso;</li>
+                <li>Notificar imediatamente sobre qualquer uso não autorizado da sua conta;</li>
+                <li>Ser o único responsável por todas as atividades realizadas com sua conta.</li>
+            </ul>
+            <p>Cada conta é pessoal e intransferível. É vedada a criação de contas em nome de terceiros sem autorização expressa.</p>
+        </div>
+        <hr class="doc-divider">
+
+        <div class="doc-section" id="planos">
+            <h2>4. Planos Free e Premium</h2>
+            <p><strong>Plano Free:</strong> Gratuito e sem limite de tempo. Inclui acesso ao painel geral, comparativo básico, geomarketing e alertas. Funcionalidades avançadas podem ser restritas.</p>
+            <p><strong>Plano Premium:</strong> Inclui todos os recursos do plano Free, além de funcionalidades exclusivas como exportações avançadas, relatórios personalizados e acesso prioritário a novos módulos.</p>
+            <p>O SaúdePortal reserva-se o direito de modificar os recursos incluídos em cada plano mediante aviso com antecedência mínima de 30 (trinta) dias. Condições de cobrança, cancelamento e reembolso serão detalhadas no momento da contratação.</p>
+        </div>
+        <hr class="doc-divider">
+
+        <div class="doc-section" id="dados-ans">
+            <h2>5. Uso dos Dados ANS</h2>
+            <p>Os dados exibidos na Plataforma são provenientes do <strong>Portal de Dados Abertos da ANS</strong> (Agência Nacional de Saúde Suplementar), disponível em <a href="https://dadosabertos.ans.gov.br" target="_blank" rel="noopener">dadosabertos.ans.gov.br</a>.</p>
+            <p>Esses dados são públicos, de acordo com a Lei de Acesso à Informação (Lei nº 12.527/2011), e são disponibilizados pela ANS sob licença aberta. O SaúdePortal realiza tratamento, normalização e agregação desses dados para fins analíticos.</p>
+            <p><strong>Os dados disponibilizados não constituem parecer jurídico, consultoria financeira, recomendação de investimento ou qualquer tipo de assessoria regulatória.</strong> O Usuário é o único responsável pelas decisões tomadas com base nas informações da Plataforma.</p>
+        </div>
+        <hr class="doc-divider">
+
+        <div class="doc-section" id="limitacoes">
+            <h2>6. Limitações de Responsabilidade</h2>
+            <p>Na extensão máxima permitida pela lei aplicável, o SaúdePortal não será responsável por:</p>
+            <ul>
+                <li>Imprecisões, desatualizações ou erros nos dados originados pela ANS;</li>
+                <li>Perdas financeiras, decisões de negócio ou danos decorrentes do uso das informações da Plataforma;</li>
+                <li>Interrupções de serviço, indisponibilidade temporária ou perda de dados causada por fatores fora de nosso controle;</li>
+                <li>Danos causados por vírus, malware ou acessos não autorizados resultantes de falhas do próprio Usuário em proteger suas credenciais.</li>
+            </ul>
+        </div>
+        <hr class="doc-divider">
+
+        <div class="doc-section" id="propriedade">
+            <h2>7. Propriedade Intelectual</h2>
+            <p>Todo o conteúdo, código-fonte, design, interface, logotipos e marcas da Plataforma são de propriedade exclusiva do SaúdePortal, protegidos pela legislação brasileira de propriedade intelectual.</p>
+            <p>É vedado ao Usuário reproduzir, distribuir, modificar ou criar obras derivadas a partir do conteúdo da Plataforma sem autorização prévia e expressa, exceto onde expressamente permitido nestes Termos.</p>
+            <p>Os dados da ANS são de domínio público, conforme as condições de uso do Portal de Dados Abertos da ANS.</p>
+        </div>
+        <hr class="doc-divider">
+
+        <div class="doc-section" id="rescisao">
+            <h2>8. Rescisão e Cancelamento</h2>
+            <p>O Usuário pode encerrar sua conta a qualquer momento por meio das configurações da Plataforma. O cancelamento não gera direito a reembolso de períodos já pagos, salvo disposição legal em contrário.</p>
+            <p>O SaúdePortal pode suspender ou encerrar o acesso do Usuário, a qualquer tempo, em caso de violação destes Termos, uso fraudulento, atividade suspeita ou por determinação legal.</p>
+        </div>
+        <hr class="doc-divider">
+
+        <div class="doc-section" id="lei">
+            <h2>9. Lei Aplicável</h2>
+            <p>Estes Termos são regidos pelas leis da República Federativa do Brasil, incluindo mas não se limitando ao Código de Defesa do Consumidor (Lei nº 8.078/1990), ao Marco Civil da Internet (Lei nº 12.965/2014) e à Lei Geral de Proteção de Dados Pessoais — LGPD (Lei nº 13.709/2018).</p>
+            <p>Fica eleito o foro da comarca de São Paulo/SP para dirimir quaisquer controvérsias decorrentes destes Termos, com renúncia de qualquer outro, por mais privilegiado que seja.</p>
+        </div>
+        <hr class="doc-divider">
+
+        <div class="doc-section" id="contato">
+            <h2>10. Contato</h2>
+            <p>Em caso de dúvidas, solicitações ou notificações relacionadas a estes Termos, entre em contato pelo e-mail <a href="mailto:legal@saudeportal.com.br">legal@saudeportal.com.br</a>.</p>
+            <p>Para questões relacionadas à privacidade e proteção de dados, consulte nossa <a href="privacidade.html">Política de Privacidade</a>.</p>
+        </div>
+
+        <div class="doc-footer">
+            <p>© 2026 SaúdePortal &nbsp;·&nbsp; <a href="privacidade.html">Política de Privacidade</a> &nbsp;·&nbsp; <a href="index.html">Voltar ao Painel</a></p>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const saved = localStorage.getItem('finvest-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+        document.getElementById('themeToggle').addEventListener('click', function () {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('finvest-theme', isDark ? 'light' : 'dark');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre — SaúdePortal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .about-hero {
+            background: linear-gradient(135deg, rgba(247,75,75,.08) 0%, rgba(124,58,237,.06) 100%);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 40px 40px; margin-bottom: 32px;
+        }
+        .about-hero-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(247,75,75,.1); color: var(--primary);
+            padding: 4px 12px; border-radius: 20px; font-size: 0.72rem;
+            font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: .04em;
+        }
+        .about-hero h1 { font-size: 2rem; font-weight: 800; color: var(--text); margin-bottom: 14px; letter-spacing: -0.03em; line-height: 1.2; }
+        .about-hero p  { font-size: 1rem; color: var(--text-secondary); line-height: 1.7; max-width: 680px; }
+
+        .about-section { margin-bottom: 36px; }
+        .about-section-title {
+            font-size: 1rem; font-weight: 700; color: var(--text);
+            margin-bottom: 18px; letter-spacing: -0.01em;
+            padding-bottom: 10px; border-bottom: 1px solid var(--border);
+        }
+
+        .data-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 22px 24px;
+            box-shadow: var(--shadow-sm);
+        }
+        .data-card p { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 14px; }
+        .data-card p:last-child { margin-bottom: 0; }
+        .data-card a { color: var(--primary); text-decoration: none; font-weight: 500; }
+        .data-card a:hover { text-decoration: underline; }
+
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+        .feature-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 18px 20px;
+            box-shadow: var(--shadow-sm); transition: box-shadow var(--transition);
+        }
+        .feature-card:hover { box-shadow: var(--shadow-md); }
+        .feature-icon {
+            width: 36px; height: 36px; border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px;
+        }
+        .feature-title { font-size: 0.87rem; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+        .feature-desc  { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; }
+
+        .tech-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tech-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 20px; padding: 6px 14px; font-size: 0.78rem;
+            font-weight: 500; color: var(--text-secondary);
+        }
+        .tech-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .version-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 18px 24px;
+            display: flex; align-items: center; gap: 20px;
+            box-shadow: var(--shadow-sm); flex-wrap: wrap;
+        }
+        .version-num { font-size: 2rem; font-weight: 800; color: var(--primary); }
+        .version-info { flex: 1; }
+        .version-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+        .version-date  { font-size: 0.85rem; color: var(--text-secondary); margin-top: 3px; }
+
+        .about-footer-links { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+        .about-footer-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.83rem; color: var(--text-secondary); text-decoration: none;
+            font-weight: 500; transition: color var(--transition);
+        }
+        .about-footer-link:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div id="sidebarContainer"></div>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Navigation">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+                    <span class="breadcrumb">Sobre</span>
+                </div>
+                <div class="top-bar-right">
+                    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+                        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+
+                <!-- Hero -->
+                <div class="about-hero">
+                    <div class="about-hero-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Portal Operadora Saúde
+                    </div>
+                    <h1>Inteligência em dados<br>de saúde suplementar</h1>
+                    <p>O SaúdePortal transforma os dados públicos da ANS em uma plataforma analítica acessível para gestores, consultores e pesquisadores de saúde suplementar no Brasil.</p>
+                </div>
+
+                <!-- De onde vêm os dados -->
+                <div class="about-section">
+                    <div class="about-section-title">De onde vêm os dados</div>
+                    <div class="data-card">
+                        <p>Todos os dados exibidos neste portal são originários do <strong>Portal de Dados Abertos da ANS</strong> (Agência Nacional de Saúde Suplementar), uma fonte pública e oficial mantida pelo Governo Federal Brasileiro.</p>
+                        <p>Os arquivos são processados mensalmente por um pipeline automatizado que baixa, normaliza, filtra e agrega as planilhas trimestrais disponíveis em <a href="https://dadosabertos.ans.gov.br" target="_blank" rel="noopener">dadosabertos.ans.gov.br</a>. A cobertura inclui beneficiários ativos, cancelados e aderidos por operadora, UF e faixa etária.</p>
+                        <p>O portal <strong>não cria, edita ou altera</strong> os dados originais da ANS. Qualquer discrepância deve ser verificada diretamente na fonte oficial.</p>
+                    </div>
+                </div>
+
+                <!-- O que você pode fazer -->
+                <div class="about-section">
+                    <div class="about-section-title">O que você pode fazer</div>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon" style="background:rgba(247,75,75,.1);color:var(--primary);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            </div>
+                            <div class="feature-title">Painel Geral</div>
+                            <div class="feature-desc">Explore 1.200+ operadoras com filtros por modalidade, UF, status e favoritos.</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" style="background:rgba(59,130,246,.1);color:#3b82f6;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            </div>
+                            <div class="feature-title">Comparativo</div>
+                            <div class="feature-desc">Compare até 4 operadoras lado a lado com gráficos Radar e evolução histórica.</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" style="background:rgba(16,185,129,.1);color:#10b981;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+                            </div>
+                            <div class="feature-title">Geomarketing</div>
+                            <div class="feature-desc">Mapa interativo da distribuição de beneficiários por estado e operadora.</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" style="background:rgba(245,158,11,.1);color:#f59e0b;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                            </div>
+                            <div class="feature-title">Alertas Regulatórios</div>
+                            <div class="feature-desc">Monitore operadoras com IDSS baixo, risco de insolvência e reclamações.</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" style="background:rgba(124,58,237,.1);color:#7c3aed;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            </div>
+                            <div class="feature-title">Análise Atuarial</div>
+                            <div class="feature-desc">Calcule provisões PEONA/IBNR e risco demográfico por faixa etária ANS.</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon" style="background:rgba(239,68,68,.1);color:#ef4444;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M16 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="17" y1="8" x2="21" y2="12"/><line x1="21" y1="8" x2="17" y2="12"/></svg>
+                            </div>
+                            <div class="feature-title">Simulador M&A</div>
+                            <div class="feature-desc">Simule fusões e aquisições com tabela pro-forma e indicadores de escala.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tecnologia -->
+                <div class="about-section">
+                    <div class="about-section-title">Tecnologia</div>
+                    <div class="data-card">
+                        <div class="tech-grid">
+                            <span class="tech-badge"><span class="tech-dot" style="background:#f7df1e;"></span> JavaScript ES6+</span>
+                            <span class="tech-badge"><span class="tech-dot" style="background:#e34c26;"></span> HTML5</span>
+                            <span class="tech-badge"><span class="tech-dot" style="background:#1572b6;"></span> CSS3</span>
+                            <span class="tech-badge"><span class="tech-dot" style="background:#3ecf8e;"></span> Supabase</span>
+                            <span class="tech-badge"><span class="tech-dot" style="background:#ff6384;"></span> Chart.js</span>
+                            <span class="tech-badge"><span class="tech-dot" style="background:#fc6d27;"></span> ApexCharts</span>
+                            <span class="tech-badge"><span class="tech-dot" style="background:#199900;"></span> Leaflet</span>
+                            <span class="tech-badge"><span class="tech-dot" style="background:#3776ab;"></span> Python (ETL)</span>
+                            <span class="tech-badge"><span class="tech-dot" style="background:#e44d26;"></span> Pandas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Versão -->
+                <div class="about-section">
+                    <div class="about-section-title">Versão atual</div>
+                    <div class="version-card">
+                        <div class="version-num">v1.3</div>
+                        <div class="version-info">
+                            <div class="version-label">Última atualização</div>
+                            <div class="version-date">28 de março de 2026</div>
+                        </div>
+                        <a href="./changelog.html" style="display:inline-flex;align-items:center;gap:6px;font-size:.83rem;font-weight:600;color:var(--primary);text-decoration:none;padding:8px 16px;border:1px solid rgba(247,75,75,.3);border-radius:var(--radius-sm);">
+                            Ver changelog completo
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Footer links -->
+                <div class="about-footer-links">
+                    <a href="./changelog.html" class="about-footer-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        Changelog
+                    </a>
+                    <a href="./status.html" class="about-footer-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        Status do Sistema
+                    </a>
+                    <a href="./termos.html" target="_blank" class="about-footer-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        Termos de Uso
+                    </a>
+                    <a href="./privacidade.html" target="_blank" class="about-footer-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Política de Privacidade
+                    </a>
+                    <a href="./help.html" class="about-footer-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        Suporte
+                    </a>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/env.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/auth-guard.js" data-require-auth="true" data-require-role="FREE"></script>
+    <script type="module">
+        import { initSidebar } from './js/sidebar.js';
+        import { loadComponent } from './js/utils/ui.js';
+
+        (function () {
+            const saved = localStorage.getItem('finvest-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('finvest-theme', isDark ? 'light' : 'dark');
+        });
+
+        await loadComponent('components/sidebar.html', 'sidebarContainer');
+        initSidebar();
+    </script>
+</body>
+</html>

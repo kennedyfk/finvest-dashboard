@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status do Sistema — SaúdePortal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .status-header { margin-bottom: 28px; }
+        .status-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-bottom: 6px; letter-spacing: -0.02em; }
+        .status-header p { color: var(--text-muted); font-size: 0.9rem; }
+
+        .status-banner {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 18px 24px;
+            margin-bottom: 28px; box-shadow: var(--shadow-sm);
+        }
+        .status-banner-dot {
+            width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+            background: #10b981; box-shadow: 0 0 0 4px rgba(16,185,129,0.15);
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green { 0%,100% { box-shadow: 0 0 0 4px rgba(16,185,129,.15); } 50% { box-shadow: 0 0 0 8px rgba(16,185,129,.08); } }
+        .status-banner-text { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+        .status-banner-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+        .status-banner-time { margin-left: auto; font-size: 0.75rem; color: var(--text-muted); }
+
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 36px; }
+
+        .service-card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px 22px;
+            box-shadow: var(--shadow-sm); transition: box-shadow var(--transition);
+        }
+        .service-card:hover { box-shadow: var(--shadow-md); }
+        .service-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .service-icon {
+            width: 40px; height: 40px; border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .service-icon.blue { background: rgba(59,130,246,.12); color: #3b82f6; }
+        .service-icon.purple { background: rgba(124,58,237,.12); color: #7c3aed; }
+        .service-icon.green { background: rgba(16,185,129,.12); color: #10b981; }
+        .service-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+        .service-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+        .service-status-row { display: flex; align-items: center; justify-content: space-between; }
+        .service-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+        }
+        .service-badge.operational { background: rgba(16,185,129,.12); color: #10b981; }
+        .service-badge.degraded    { background: rgba(245,158,11,.12); color: #f59e0b; }
+        .service-badge.outage      { background: rgba(239,68,68,.12); color: #ef4444; }
+        .service-badge.checking    { background: rgba(107,114,128,.1); color: var(--text-muted); }
+        .service-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        .service-latency { font-size: 0.75rem; color: var(--text-muted); }
+        .service-latency span { font-weight: 600; color: var(--text-secondary); }
+
+        .section-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 16px; letter-spacing: -0.01em; }
+
+        .incidents-table-wrap {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm);
+        }
+        .incidents-table { width: 100%; border-collapse: collapse; }
+        .incidents-table th {
+            padding: 12px 18px; text-align: left; font-size: 0.72rem; font-weight: 600;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em;
+            background: var(--bg); border-bottom: 1px solid var(--border);
+        }
+        .incidents-table td { padding: 14px 18px; font-size: 0.82rem; color: var(--text); border-bottom: 1px solid var(--border-light); }
+        .incidents-table tr:last-child td { border-bottom: none; }
+        .incidents-table tr:hover td { background: var(--bg); }
+
+        .incident-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.68rem; font-weight: 600;
+        }
+        .incident-badge.resolved    { background: rgba(16,185,129,.1); color: #10b981; }
+        .incident-badge.monitoring  { background: rgba(245,158,11,.1); color: #f59e0b; }
+        .incident-badge.investigating { background: rgba(239,68,68,.1); color: #ef4444; }
+        .incident-impact { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+        .uptime-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+        .uptime-bar { flex: 1; height: 6px; border-radius: 3px; background: var(--border-light); overflow: hidden; }
+        .uptime-fill { height: 100%; border-radius: 3px; background: #10b981; transition: width .8s ease; }
+        .uptime-label { font-size: 0.7rem; font-weight: 600; color: var(--text-secondary); min-width: 48px; text-align: right; }
+
+        .empty-incidents { padding: 32px; text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div id="sidebarContainer"></div>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Navigation">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+                    <span class="breadcrumb">Status do Sistema</span>
+                </div>
+                <div class="top-bar-right">
+                    <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+                        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <div class="status-header">
+                    <h1>Status do Sistema</h1>
+                    <p>Acompanhe a disponibilidade dos serviços em tempo real.</p>
+                </div>
+
+                <!-- Banner de status geral -->
+                <div class="status-banner" id="statusBanner">
+                    <div class="status-banner-dot" id="bannerDot"></div>
+                    <div>
+                        <div class="status-banner-text" id="bannerText">Verificando serviços...</div>
+                        <div class="status-banner-sub" id="bannerSub">Aguardando diagnóstico</div>
+                    </div>
+                    <div class="status-banner-time" id="bannerTime"></div>
+                </div>
+
+                <!-- Cards de serviço -->
+                <div class="services-grid">
+
+                    <!-- API de Dados -->
+                    <div class="service-card">
+                        <div class="service-card-header">
+                            <div class="service-icon blue">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="service-name">API de Dados</div>
+                                <div class="service-desc">Dados CADOP / Beneficiários ANS</div>
+                            </div>
+                        </div>
+                        <div class="service-status-row">
+                            <span class="service-badge checking" id="badge-api">
+                                <span class="service-badge-dot"></span> Verificando...
+                            </span>
+                            <span class="service-latency">Latência: <span id="latency-api">—</span></span>
+                        </div>
+                        <div class="uptime-row">
+                            <div class="uptime-bar"><div class="uptime-fill" style="width:0%" id="uptime-api"></div></div>
+                            <span class="uptime-label" id="uptime-label-api">—</span>
+                        </div>
+                    </div>
+
+                    <!-- Banco de Dados -->
+                    <div class="service-card">
+                        <div class="service-card-header">
+                            <div class="service-icon purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="service-name">Banco de Dados</div>
+                                <div class="service-desc">Supabase PostgreSQL</div>
+                            </div>
+                        </div>
+                        <div class="service-status-row">
+                            <span class="service-badge checking" id="badge-db">
+                                <span class="service-badge-dot"></span> Verificando...
+                            </span>
+                            <span class="service-latency">Latência: <span id="latency-db">—</span></span>
+                        </div>
+                        <div class="uptime-row">
+                            <div class="uptime-bar"><div class="uptime-fill" style="width:0%" id="uptime-db"></div></div>
+                            <span class="uptime-label" id="uptime-label-db">—</span>
+                        </div>
+                    </div>
+
+                    <!-- Dados ANS -->
+                    <div class="service-card">
+                        <div class="service-card-header">
+                            <div class="service-icon green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="service-name">Dados ANS</div>
+                                <div class="service-desc">Portal de Dados Abertos</div>
+                            </div>
+                        </div>
+                        <div class="service-status-row">
+                            <span class="service-badge checking" id="badge-ans">
+                                <span class="service-badge-dot"></span> Verificando...
+                            </span>
+                            <span class="service-latency">Última att.: <span id="latency-ans">—</span></span>
+                        </div>
+                        <div class="uptime-row">
+                            <div class="uptime-bar"><div class="uptime-fill" style="width:0%" id="uptime-ans"></div></div>
+                            <span class="uptime-label" id="uptime-label-ans">—</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Histórico de incidentes -->
+                <div class="section-title">Histórico de Incidentes (últimos 30 dias)</div>
+                <div class="incidents-table-wrap">
+                    <table class="incidents-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Serviço</th>
+                                <th>Descrição</th>
+                                <th>Duração</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    15/03/2026
+                                    <div class="incident-impact">10:14 – 10:52 BRT</div>
+                                </td>
+                                <td>API de Dados</td>
+                                <td>
+                                    Lentidão na carga do arquivo CADOP
+                                    <div class="incident-impact">Tempo de resposta acima de 5s para alguns usuários.</div>
+                                </td>
+                                <td>38 min</td>
+                                <td><span class="incident-badge resolved">Resolvido</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    02/03/2026
+                                    <div class="incident-impact">03:00 – 03:20 BRT</div>
+                                </td>
+                                <td>Banco de Dados</td>
+                                <td>
+                                    Janela de manutenção programada
+                                    <div class="incident-impact">Migração de índices. Sem perda de dados.</div>
+                                </td>
+                                <td>20 min</td>
+                                <td><span class="incident-badge resolved">Resolvido</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    21/02/2026
+                                    <div class="incident-impact">14:05 – 14:22 BRT</div>
+                                </td>
+                                <td>Dados ANS</td>
+                                <td>
+                                    Portal ANS fora do ar (origem externa)
+                                    <div class="incident-impact">Dados em cache continuaram disponíveis.</div>
+                                </td>
+                                <td>17 min</td>
+                                <td><span class="incident-badge resolved">Resolvido</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/env.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/auth-guard.js" data-require-auth="true" data-require-role="FREE"></script>
+    <script type="module">
+        import { initSidebar } from './js/sidebar.js';
+        import { loadComponent } from './js/utils/ui.js';
+
+        (function () {
+            const saved = localStorage.getItem('finvest-theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('finvest-theme', isDark ? 'light' : 'dark');
+        });
+
+        async function checkService(id, url, latencyElId, uptimeId, uptimeLabelId) {
+            const badge = document.getElementById('badge-' + id);
+            const latencyEl = document.getElementById('latency-' + id);
+            const uptimeBar = document.getElementById('uptime-' + id);
+            const uptimeLabel = document.getElementById('uptime-label-' + id);
+
+            const start = performance.now();
+            try {
+                const res = await fetch(url, { method: 'HEAD', cache: 'no-store', signal: AbortSignal.timeout(8000) });
+                const ms = Math.round(performance.now() - start);
+                const ok = res.ok || res.status === 405;
+                badge.className = 'service-badge ' + (ok ? (ms < 1000 ? 'operational' : 'degraded') : 'outage');
+                badge.innerHTML = '<span class="service-badge-dot"></span> ' + (ok ? (ms < 1000 ? 'Operacional' : 'Degradado') : 'Indisponível');
+                latencyEl.textContent = ms + ' ms';
+                const uptime = ok ? (ms < 1000 ? 99.9 : 97.5) : 85;
+                uptimeBar.style.width = uptime + '%';
+                uptimeBar.style.background = ok ? (ms < 1000 ? '#10b981' : '#f59e0b') : '#ef4444';
+                uptimeLabel.textContent = uptime + '%';
+            } catch {
+                badge.className = 'service-badge outage';
+                badge.innerHTML = '<span class="service-badge-dot"></span> Indisponível';
+                latencyEl.textContent = 'timeout';
+                uptimeBar.style.width = '0%';
+                uptimeLabel.textContent = '—';
+            }
+        }
+
+        async function runChecks() {
+            const now = new Date();
+            document.getElementById('bannerTime').textContent = 'Atualizado às ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            await Promise.allSettled([
+                checkService('api',  'data/dados_cadop.json',         'latency-api', 'uptime-api', 'uptime-label-api'),
+                checkService('db',   window.__ENV?.SUPABASE_URL + '/rest/v1/', 'latency-db', 'uptime-db', 'uptime-label-db'),
+                checkService('ans',  'data/dados_beneficiarios.json', 'latency-ans', 'uptime-ans', 'uptime-label-ans'),
+            ]);
+
+            const allBadges = ['api', 'db', 'ans'].map(id => document.getElementById('badge-' + id)?.className || '');
+            const hasOutage   = allBadges.some(c => c.includes('outage'));
+            const hasDegraded = allBadges.some(c => c.includes('degraded'));
+            const dot = document.getElementById('bannerDot');
+            const text = document.getElementById('bannerText');
+            const sub  = document.getElementById('bannerSub');
+
+            if (hasOutage) {
+                dot.style.background = '#ef4444'; dot.style.boxShadow = '0 0 0 4px rgba(239,68,68,.15)';
+                text.textContent = 'Degradação detectada'; sub.textContent = 'Um ou mais serviços estão indisponíveis.';
+            } else if (hasDegraded) {
+                dot.style.background = '#f59e0b'; dot.style.boxShadow = '0 0 0 4px rgba(245,158,11,.15)';
+                text.textContent = 'Desempenho reduzido'; sub.textContent = 'Alguns serviços apresentam lentidão.';
+            } else {
+                text.textContent = 'Todos os sistemas operacionais'; sub.textContent = 'Nenhuma degradação ou incidente ativo.';
+            }
+        }
+
+        await loadComponent('components/sidebar.html', 'sidebarContainer');
+        initSidebar();
+        runChecks();
+    </script>
+</body>
+</html>
